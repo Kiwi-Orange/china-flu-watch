@@ -145,7 +145,7 @@ def archive_cnic(d):
         blk = (d.get("ili") or {}).get(scope) or {}
         if blk.get("current") is not None:
             ili_rows.append([d["year"], d["week"], scope, blk["current"], "current"])
-        if blk.get("prev_week") is not None:
+        if blk.get("prev_week") is not None and d["week"] > 1:
             ili_rows.append([d["year"], d["week"] - 1, scope, blk["prev_week"], "prev_week"])
         for y, v in (blk.get("same_week_prior_years") or {}).items():
             ili_rows.append([y, d["week"], scope, v, "comparison"])

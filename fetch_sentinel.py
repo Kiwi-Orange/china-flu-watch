@@ -41,7 +41,7 @@ def _parse_pathogen_table(rows):
         cells = [c for c in cells if c]
         if len(cells) >= 5 and to_float(cells[1]) is not None:
             out.append({
-                "name": cells[0],
+                "name": cells[0].replace(" ", ""),
                 "outpatient": to_float(cells[1]),
                 "outpatient_wow": to_float(cells[2]),
                 "inpatient": to_float(cells[3]),
