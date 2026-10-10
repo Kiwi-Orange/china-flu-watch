@@ -32,9 +32,28 @@
   </section>
 
   <section class="card">
+    <h2>各流感季 ILI% 对比</h2>
+    <p class="note">流感季自每年第 27 周起算（冬峰落在同一季内）。灰色细线为往季，彩色粗线为本季，可直观看出本季走势偏早还是偏晚。</p>
+    <div class="seg" id="season-scope">
+      <button data-k="south" class="on">南方</button><button data-k="north">北方</button><button data-k="national">全国</button>
+    </div>
+    <div id="season-chart" class="chart"></div>
+    <div class="legend" id="season-legend"></div>
+  </section>
+
+  <section class="card">
     <h2>本周病原体检测阳性率 <small id="pathogen-week"></small></h2>
     <p class="note">全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊流感样病例（ILI）与住院严重急性呼吸道感染（SARI）分列。</p>
     <div id="pathogen-chart" class="chart"></div>
+  </section>
+
+  <section class="card">
+    <h2>病原体阳性率周度热力图</h2>
+    <p class="note">哨点周报各周核酸检测阳性率，颜色越红越高，灰色为无数据。悬浮可查看具体数值。</p>
+    <div class="seg" id="heatmap-scene">
+      <button data-k="outpatient" class="on">门急诊 ILI</button><button data-k="inpatient">住院 SARI</button>
+    </div>
+    <div id="pathogen-heatmap" class="chart"></div>
   </section>
 
   <section class="card">

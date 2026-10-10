@@ -16,9 +16,20 @@ function svgEl(tag, attrs) {
   return el;
 }
 
-/* ---------- 折线图 ---------- */
+/* ---------- 悬浮提示 ---------- */
+let tipEl = null;
+function showTip(x, y, html) {
+  if (!tipEl) { tipEl = document.createElement("div"); tipEl.className = "chart-tip"; document.body.appendChild(tipEl); }
+  tipEl.innerHTML = html;
+  tipEl.style.display = "block";
+  tipEl.style.left = Math.min(x + 12, window.innerWidth + window.scrollX - tipEl.offsetWidth - 8) + "px";
+  tipEl.style.top = (y + 14) + "px";
+}
+function hideTip() { if (tipEl) tipEl.style.display = "none"; }
+
+/* ---------- 折线图（支持置信带、虚线、悬浮十字线） ---------- */
 function lineChart(container, series, opts) {
-  const W = 880, H = 260, P = { l: 42, r: 12, t: 12, b: 28 };
+  const W = 880, H = opts.height || 260, P = { l: 42, r: 12, t: 12, b: 28 };
   const all = series.flatMap(s => s.points.concat(s.band ? s.band.hi.concat(s.band.lo) : []));
   if (!all.length) { container.textContent = "暂无足够历史数据，随每周抓取累积"; return; }
   const xs = all.map(p => p.x), ys = all.map(p => p.y);
@@ -50,13 +61,94 @@ function lineChart(container, series, opts) {
   }
   for (const s of series) {
     const pts = s.points.map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
-    const attrs = { points: pts, fill: "none", stroke: s.color, "stroke-width": 2 };
+    const attrs = { points: pts, fill: "none", stroke: s.color, "stroke-width": s.thin ? 1.2 : 2 };
     if (s.dash) attrs["stroke-dasharray"] = "5 4";
+    if (s.thin) attrs["stroke-opacity"] = 0.55;
     svg.appendChild(svgEl("polyline", attrs));
-    for (const p of s.points)
-      svg.appendChild(svgEl("circle", { cx: X(p.x), cy: Y(p.y), r: s.dash ? 2 : 2.4, fill: s.color }));
+    if (s.points.length <= 60 && !s.thin)
+      for (const p of s.points)
+        svg.appendChild(svgEl("circle", { cx: X(p.x), cy: Y(p.y), r: s.dash ? 2 : 2.4, fill: s.color }));
+  }
+  if (opts.hover !== false) {
+    const guide = svgEl("line", { y1: P.t, y2: H - P.b, stroke: "#9ca3af", "stroke-dasharray": "3 3", visibility: "hidden" });
+    svg.appendChild(guide);
+    svg.style.cursor = "crosshair";
+    svg.addEventListener("mousemove", (e) => {
+      const rect = svg.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) / rect.width * W;
+      const fx = x0 + (mx - P.l) / (W - P.l - P.r) * (x1 - x0);
+      let best = null, bd = Infinity;
+      for (const s of series) for (const p of s.points) {
+        const d = Math.abs(p.x - fx);
+        if (d < bd) { bd = d; best = p.x; }
+      }
+      if (best === null) return;
+      guide.setAttribute("x1", X(best)); guide.setAttribute("x2", X(best));
+      guide.setAttribute("visibility", "visible");
+      let html = `<b>${opts.xLabel(best)}</b>`;
+      for (const s of series) {
+        const p = s.points.find(q => q.x === best);
+        if (p) html += `<br><span style="color:${s.color}">■</span> ${s.name || ""}${s.dash ? "（预测）" : ""} ${p.y}%`;
+      }
+      showTip(e.pageX, e.pageY, html);
+    });
+    svg.addEventListener("mouseleave", () => { guide.setAttribute("visibility", "hidden"); hideTip(); });
   }
   container.appendChild(svg);
+}
+
+/* ---------- 热力图 ---------- */
+function lerpColor(c0, c1, t) {
+  const r = Math.round(c0[0] + (c1[0] - c0[0]) * t);
+  const g = Math.round(c0[1] + (c1[1] - c0[1]) * t);
+  const b = Math.round(c0[2] + (c1[2] - c0[2]) * t);
+  return `rgb(${r},${g},${b})`;
+}
+
+function heatmap(container, rows, cols, cell, opts) {
+  const cw = opts.cellW || 9, rh = opts.rowH || 22, P = { l: opts.labelW || 110, t: 8, r: 8, b: 44 };
+  const W = P.l + cols.length * cw + P.r, H = P.t + rows.length * rh + P.b;
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}` });
+  rows.forEach((rl, i) => {
+    const y = P.t + i * rh;
+    const label = svgEl("text", { x: P.l - 8, y: y + rh / 2 + 4, "text-anchor": "end", class: "bar-label" });
+    label.textContent = rl;
+    svg.appendChild(label);
+    cols.forEach((ck, j) => {
+      const v = cell(i, j);
+      const fill = v === null || v === undefined ? "#f3f4f6"
+        : lerpColor([255, 255, 255], [220, 38, 38], Math.min(Math.sqrt(v / opts.vmax), 1));
+      const rect = svgEl("rect", { x: P.l + j * cw, y: y + 1, width: cw - 0.6, height: rh - 2, fill, rx: 1 });
+      rect.addEventListener("mousemove", (e) =>
+        showTip(e.pageX, e.pageY, `<b>${rl}</b> · ${opts.colLabel(ck)}<br>阳性率 ${v === null || v === undefined ? "无数据" : v + "%"}`));
+      rect.addEventListener("mouseleave", hideTip);
+      svg.appendChild(rect);
+    });
+  });
+  const step = Math.ceil(cols.length / 11);
+  cols.forEach((ck, j) => {
+    if (j % step) return;
+    const t = svgEl("text", { x: P.l + j * cw + cw / 2, y: P.t + rows.length * rh + 13, "text-anchor": "middle", class: "axis-label" });
+    t.textContent = opts.colLabel(ck);
+    svg.appendChild(t);
+  });
+  const lw = 120, lx = W - P.r - lw, ly = H - 9;
+  for (let i = 0; i < 24; i++)
+    svg.appendChild(svgEl("rect", { x: lx + i * lw / 24, y: ly, width: lw / 24 + 0.6, height: 7, fill: lerpColor([255, 255, 255], [220, 38, 38], Math.sqrt(i / 23)) }));
+  const g0 = svgEl("text", { x: lx, y: ly - 2, class: "axis-label", "text-anchor": "start" });
+  g0.textContent = "0%";
+  svg.appendChild(g0);
+  const g1 = svgEl("text", { x: lx + lw, y: ly - 2, class: "axis-label", "text-anchor": "end" });
+  g1.textContent = `≥${opts.vmax}%`;
+  svg.appendChild(g1);
+  container.appendChild(svg);
+}
+
+/* ISO 周的周一日期 */
+function isoDate(y, w) {
+  const d = new Date(Date.UTC(y, 0, 4));
+  d.setUTCDate(d.getUTCDate() - (d.getUTCDay() || 7) + 1 + (w - 1) * 7);
+  return d;
 }
 
 /* ---------- 横向条形图 ---------- */
@@ -125,7 +217,7 @@ function renderIli(t, f) {
   for (const [key, name, color] of specs) {
     const pts = (t.ili[key] || []).map(p => ({ x: fx(p), y: p.pct }));
     if (pts.length) {
-      series.push({ points: pts, color });
+      series.push({ points: pts, color, name });
       legend.push(`<span style="color:${color}">${name}</span>`);
     }
     const fr = f && f.regions && f.regions[key];
@@ -134,7 +226,7 @@ function renderIli(t, f) {
       const anchor = [{ x: last.x, y: last.y }];
       series.push({
         points: anchor.concat(fr.points.map(p => ({ x: fx(p), y: p.pct }))),
-        color, dash: true,
+        color, dash: true, name,
         band: {
           hi: anchor.concat(fr.points.map(p => ({ x: fx(p), y: p.hi }))),
           lo: anchor.concat(fr.points.map(p => ({ x: fx(p), y: p.lo }))),
@@ -166,10 +258,10 @@ function renderForecast(f, t) {
     if (!r || !r.points.length || !obs.length) continue;
     const recent = obs.slice(-26);
     const anchor = [obs[obs.length - 1]];
-    series.push({ points: recent, color: colors[key] });
+    series.push({ points: recent, color: colors[key], name: names[key] });
     series.push({
       points: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.pct }))),
-      color: colors[key], dash: true,
+      color: colors[key], dash: true, name: names[key],
       band: {
         hi: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.hi }))),
         lo: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.lo }))),
@@ -201,6 +293,60 @@ function renderForecast(f, t) {
       ${seasons ? `<div class="meta">往季主高峰：${seasons}</div>` : ""}</div>`);
   }
   $("forecast-cards").innerHTML = html.join("");
+}
+
+/* 各流感季 ILI% 对比：流感季自当年 W27 起算（冬峰落在同一季内） */
+function renderSeasons(t, scope) {
+  const pts = t.ili[scope] || [];
+  const seasons = new Map();
+  for (const p of pts) {
+    const sy = p.week >= 27 ? p.year : p.year - 1;
+    const sw = Math.round((isoDate(p.year, p.week) - isoDate(sy, 27)) / 6048e5);
+    if (sw < 0 || sw > 53) continue;
+    if (!seasons.has(sy)) seasons.set(sy, []);
+    seasons.get(sy).push({ x: sw, y: p.pct });
+  }
+  const keys = [...seasons.keys()].filter(k => seasons.get(k).length >= 8).sort((a, b) => a - b);
+  const cur = keys[keys.length - 1];
+  const vivid = { south: "var(--south)", north: "var(--north)", national: "var(--national)" }[scope];
+  const grays = { 1: "#6b7280", 2: "#9ca3af", 3: "#d1d5db" };
+  const series = [], legend = [];
+  for (const sy of keys) {
+    const isCur = sy === cur;
+    const color = isCur ? vivid : (grays[cur - sy] || "#e5e7eb");
+    const label = `${sy}–${String(sy + 1).slice(2)} 季`;
+    series.push({ points: seasons.get(sy), color, name: label, thin: !isCur });
+    legend.push(`<span style="color:${color}">${label}${isCur ? "（本季）" : ""}</span>`);
+  }
+  $("season-chart").innerHTML = "";
+  lineChart($("season-chart"), series, {
+    xLabel: (x) => { let w = x + 27; if (w > 52) w -= 52; return "W" + w; }
+  });
+  $("season-legend").innerHTML = legend.join("");
+}
+
+/* 病原体阳性率周度热力图 */
+function renderHeatmap(t, scene) {
+  const ph = t.pathogens || {};
+  const names = Object.keys(ph).filter(n => ph[n].some(p => p[scene] !== null));
+  if (!names.length) return;
+  const weekMap = new Map();
+  for (const n of names)
+    for (const p of ph[n])
+      if (p[scene] !== null && !weekMap.has(p.year * 100 + p.week))
+        weekMap.set(p.year * 100 + p.week, `${p.year}W${p.week}`);
+  const weeks = [...weekMap.keys()].sort((a, b) => a - b);
+  const lastVal = (n) => { const a = ph[n].filter(p => p[scene] !== null); return a.length ? a[a.length - 1][scene] : -1; };
+  names.sort((a, b) => lastVal(b) - lastVal(a));
+  const idx = {};
+  for (const n of names) { idx[n] = {}; for (const p of ph[n]) idx[n][p.year * 100 + p.week] = p[scene]; }
+  let vmax = 1;
+  for (const n of names) for (const p of ph[n]) if (p[scene] !== null) vmax = Math.max(vmax, p[scene]);
+  vmax = Math.ceil(vmax / 5) * 5;
+  $("pathogen-heatmap").innerHTML = "";
+  heatmap($("pathogen-heatmap"), names, weeks,
+    (i, j) => { const v = idx[names[i]][weeks[j]]; return v === undefined ? null : v; },
+    { vmax, colLabel: (k) => weekMap.get(k) });
 }
 
 function renderPathogens(d) {
@@ -293,21 +439,38 @@ function renderAnalysis(d) {
   $("analysis").innerHTML = html;
 }
 
+let TRENDS = null;
 async function main() {
   const [latest, trends, forecast] = await Promise.all([
     fetch("data/latest.json?_=" + Date.now()).then(r => r.json()),
     fetch("data/trends.json?_=" + Date.now()).then(r => r.json()).catch(() => null),
     fetch("data/forecast.json?_=" + Date.now()).then(r => r.json()).catch(() => null),
   ]);
+  TRENDS = trends;
   $("updated").textContent = `数据更新：${latest.updated}${(latest.sentinel?.stale || latest.cnic?.stale) ? "（部分源抓取失败，含旧数据）" : ""}`;
   renderKpis(latest);
-  if (trends) renderIli(trends, forecast);
+  if (trends) {
+    renderIli(trends, forecast);
+    renderSeasons(trends, "south");
+    renderHeatmap(trends, "outpatient");
+  }
   if (forecast) renderForecast(forecast, trends);
   renderPathogens(latest);
   renderLab(latest);
   renderOutbreaks(latest);
   renderCities(latest);
   renderAnalysis(latest);
+  for (const [id, fn] of [["season-scope", (k) => renderSeasons(TRENDS, k)],
+                          ["heatmap-scene", (k) => renderHeatmap(TRENDS, k)]]) {
+    const el = $(id);
+    if (!el) continue;
+    el.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b || !TRENDS) return;
+      for (const x of el.querySelectorAll("button")) x.classList.toggle("on", x === b);
+      fn(b.dataset.k);
+    });
+  }
 }
 
 main().catch(e => { $("updated").textContent = "数据加载失败: " + e.message; });
