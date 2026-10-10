@@ -1,0 +1,8 @@
+city,year,week,scene,rank,pathogen,pct
+chongqing,2026,38,inpatient,1,鼻病毒,11.0
+chongqing,2026,38,inpatient,2,流感病毒,9.0
+chongqing,2026,38,inpatient,3,肠道病毒,4.0
+chongqing,2026,38,outpatient,1,流感病毒,19.0
+chongqing,2026,38,outpatient,2,鼻病毒,15.0
+chongqing,2026,38,outpatient,3,人偏肺病毒,4.0
+chongqing,2026,38,outpatient,4,副流感病毒,4.0

@@ -1,0 +1,12 @@
+year,week,scope,pct,source
+2023,40,north,3.2,comparison
+2023,40,south,5.2,comparison
+2024,40,north,3.7,comparison
+2024,40,south,4.0,comparison
+2025,40,north,3.2,comparison
+2025,40,south,4.2,comparison
+2026,39,north,3.3,prev_week
+2026,39,south,5.2,prev_week
+2026,40,national,3.9,current
+2026,40,north,3.1,current
+2026,40,south,4.8,current

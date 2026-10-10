@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全国呼吸道传染病周报监测</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>全国呼吸道传染病周报监测</h1>
+  <p class="subtitle">中国疾控中心 · 国家流感中心公开周报聚合 | 数据仅供参考，不构成医疗建议</p>
+  <p class="updated" id="updated">加载中…</p>
+</header>
+
+<main>
+  <section id="kpis" class="kpi-grid"></section>
+
+  <section class="card">
+    <h2>流感样病例百分比（ILI%）趋势</h2>
+    <p class="note">哨点医院流感样病例占门急诊就诊总数比例。数据源：国家流感中心流感监测周报（南/北方）、中疾控哨点监测周报（全国）。历史数据随周报滚动累积。</p>
+    <div id="ili-chart" class="chart"></div>
+    <div class="legend" id="ili-legend"></div>
+  </section>
+
+  <section class="card">
+    <h2>本周病原体检测阳性率 <small id="pathogen-week"></small></h2>
+    <p class="note">全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊流感样病例（ILI）与住院严重急性呼吸道感染（SARI）分列。</p>
+    <div id="pathogen-chart" class="chart"></div>
+  </section>
+
+  <section class="card">
+    <h2>流感病毒型别构成 <small id="lab-week"></small></h2>
+    <p class="note">国家流感监测网络实验室检测阳性标本的型别分布。</p>
+    <div id="lab-chart" class="chart"></div>
+    <div id="lab-detail" class="kv"></div>
+  </section>
+
+  <section class="card">
+    <h2>流感样病例暴发疫情</h2>
+    <div id="outbreak-kpis" class="kpi-grid small"></div>
+    <div id="outbreak-regions" class="chart"></div>
+  </section>
+
+  <section class="card">
+    <h2>重点城市</h2>
+    <div id="cities" class="city-grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>官方分析与健康提示</h2>
+    <div id="analysis" class="analysis"></div>
+  </section>
+</main>
+
+<footer>
+  <p>数据来源：
+    <a href="https://www.chinacdc.cn/jksj/jksj04_14275/">中疾控·全国急性呼吸道传染病哨点监测情况</a>（每周）、
+    <a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/">国家流感中心·中国流感监测周报</a>（每周）、
+    <a href="https://www.cqcdc.org/index.php?a=lists&catid=209">重庆疾控</a>（周）、
+    <a href="https://wsjkw.sh.gov.cn/yqxx/index.html">上海市卫健委</a>（月）。
+    原始数据归各发布机构所有。</p>
+  <p>本站为个人非营利信息展示项目，由 GitHub Actions 定时抓取公开网页生成；数据未经质控，如有出入以官方发布为准。</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

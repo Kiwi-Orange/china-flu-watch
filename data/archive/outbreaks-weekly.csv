@@ -1,0 +1,2 @@
+year,week,week_total,week_by_type_json,season_total,season_south,season_north,season_regions_json
+2026,40,10,"{""A(H3N2)"": 1, ""A(H1N1)pdm09"": 4, ""B(Victoria)"": 3, ""混合型"": 1, ""未检测"": 1}",378,286,92,"{""西南"": 143, ""华北"": 18, ""西北"": 32, ""华南"": 48, ""华东"": 103, ""华中"": 13, ""东北"": 21}"

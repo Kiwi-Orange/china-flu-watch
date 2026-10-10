@@ -1,0 +1,4 @@
+year,week,region,tested,positive,positive_pct,a,h1n1pdm09,h3n2,a_unsubtyped,b,b_unlineaged,victoria,yamagata
+2026,40,north,7816,170,2.2,121,35,86,0,49,0,49,0
+2026,40,south,9919,1877,18.9,1172,134,1038,0,705,0,705,0
+2026,40,total,17735,2047,11.5,1293,169,1124,0,754,0,754,0
