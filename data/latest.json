@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-10 10:37:59 +08:00",
+ "updated": "2026-10-10 11:03:19 +08:00",
  "sentinel": {
   "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261008_1842095.html",
   "year": 2026,
@@ -380,8 +380,8 @@
    "covid_cases": 74631,
    "total_cases": 136249,
    "total_deaths": 16,
-   "stale": false
+   "stale": true
   },
-  "updated": "2026-10-10 10:39:02 +08:00"
+  "updated": "2026-10-10 11:04:35 +08:00"
  }
 }
