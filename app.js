@@ -19,7 +19,7 @@ function svgEl(tag, attrs) {
 /* ---------- 折线图 ---------- */
 function lineChart(container, series, opts) {
   const W = 880, H = 260, P = { l: 42, r: 12, t: 12, b: 28 };
-  const all = series.flatMap(s => s.points);
+  const all = series.flatMap(s => s.points.concat(s.band ? s.band.hi.concat(s.band.lo) : []));
   if (!all.length) { container.textContent = "暂无足够历史数据，随每周抓取累积"; return; }
   const xs = all.map(p => p.x), ys = all.map(p => p.y);
   const x0 = Math.min(...xs), x1 = Math.max(...xs);
@@ -42,10 +42,19 @@ function lineChart(container, series, opts) {
     svg.appendChild(t);
   }
   for (const s of series) {
+    if (s.band) {
+      const up = s.band.hi.map(p => `${X(p.x)},${Y(p.y)}`);
+      const dn = s.band.lo.map(p => `${X(p.x)},${Y(p.y)}`).reverse();
+      svg.appendChild(svgEl("polygon", { points: up.concat(dn).join(" "), fill: s.color, "fill-opacity": 0.12 }));
+    }
+  }
+  for (const s of series) {
     const pts = s.points.map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
-    svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: s.color, "stroke-width": 2 }));
+    const attrs = { points: pts, fill: "none", stroke: s.color, "stroke-width": 2 };
+    if (s.dash) attrs["stroke-dasharray"] = "5 4";
+    svg.appendChild(svgEl("polyline", attrs));
     for (const p of s.points)
-      svg.appendChild(svgEl("circle", { cx: X(p.x), cy: Y(p.y), r: 2.4, fill: s.color }));
+      svg.appendChild(svgEl("circle", { cx: X(p.x), cy: Y(p.y), r: s.dash ? 2 : 2.4, fill: s.color }));
   }
   container.appendChild(svg);
 }
@@ -108,20 +117,90 @@ function renderKpis(d) {
     `<div class="kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="sub">${k.sub}</div></div>`).join("");
 }
 
-function renderIli(t) {
+function renderIli(t, f) {
   const specs = [["south", "南方省份", "var(--south)"], ["north", "北方省份", "var(--north)"], ["national", "全国", "var(--national)"]];
   const series = [], legend = [];
+  const fx = (p) => p.year + (p.week - 1) / 52;
+  let hasForecast = false;
   for (const [key, name, color] of specs) {
-    const pts = (t.ili[key] || []).map(p => ({ x: p.year + (p.week - 1) / 52, y: p.pct }));
+    const pts = (t.ili[key] || []).map(p => ({ x: fx(p), y: p.pct }));
     if (pts.length) {
       series.push({ points: pts, color });
       legend.push(`<span style="color:${color}">${name}</span>`);
+    }
+    const fr = f && f.regions && f.regions[key];
+    if (fr && fr.points.length && pts.length) {
+      const last = pts[pts.length - 1];
+      const anchor = [{ x: last.x, y: last.y }];
+      series.push({
+        points: anchor.concat(fr.points.map(p => ({ x: fx(p), y: p.pct }))),
+        color, dash: true,
+        band: {
+          hi: anchor.concat(fr.points.map(p => ({ x: fx(p), y: p.hi }))),
+          lo: anchor.concat(fr.points.map(p => ({ x: fx(p), y: p.lo }))),
+        },
+      });
+      hasForecast = true;
     }
   }
   lineChart($("ili-chart"), series, {
     xLabel: (x) => { const y = Math.floor(x); const w = Math.round((x - y) * 52) + 1; return `${y}W${w}`; }
   });
+  if (hasForecast)
+    legend.push(`<span class="dash-note">虚线：未来 ${f.horizon} 周预测，阴影为 80% 区间</span>`);
   $("ili-legend").innerHTML = legend.join("");
+}
+
+function renderForecast(f, t) {
+  const names = { south: "南方省份", north: "北方省份", national: "全国" };
+  const colors = { south: "var(--south)", north: "var(--north)", national: "var(--national)" };
+  $("forecast-section").style.display = "";
+  $("forecast-range").textContent = f.generated ? `（生成于 ${f.generated}）` : "";
+
+  // 近 26 周 + 未来 4 周放大图
+  const fx = (p) => p.year + (p.week - 1) / 52;
+  const series = [], legend = [];
+  for (const key of ["south", "north", "national"]) {
+    const r = f.regions[key];
+    const obs = ((t && t.ili[key]) || []).map(p => ({ x: fx(p), y: p.pct }));
+    if (!r || !r.points.length || !obs.length) continue;
+    const recent = obs.slice(-26);
+    const anchor = [obs[obs.length - 1]];
+    series.push({ points: recent, color: colors[key] });
+    series.push({
+      points: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.pct }))),
+      color: colors[key], dash: true,
+      band: {
+        hi: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.hi }))),
+        lo: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.lo }))),
+      },
+    });
+    legend.push(`<span style="color:${colors[key]}">${names[key]}</span>`);
+  }
+  lineChart($("forecast-chart"), series, {
+    xLabel: (x) => { const y = Math.floor(x); const w = Math.round((x - y) * 52) + 1; return `${y}W${w}`; }
+  });
+  if (legend.length)
+    legend.push(`<span class="dash-note">虚线：未来 ${f.horizon} 周预测，阴影为 80% 区间</span>`);
+  $("forecast-legend").innerHTML = legend.join("");
+
+  const html = [];
+  for (const key of ["south", "north", "national"]) {
+    const r = f.regions[key];
+    if (!r) continue;
+    const seq = r.points.map(p =>
+      `<div class="fc-step"><div class="fc-week">${p.year}W${p.week}</div>` +
+      `<div class="fc-val">${p.pct}%</div><div class="fc-range">${p.lo}–${p.hi}</div></div>`).join("");
+    const delta = r.current - r.baseline_now;
+    const vsHist = `当前 ${r.current}%，${delta >= 0 ? "高" : "低"}于历史同期基线 ${r.baseline_now}%`;
+    const seasons = (r.seasons || []).map(s =>
+      `${s.season} 季高峰 ${s.peak_year}W${s.peak_week}（${s.peak_pct}%）`).join("；");
+    html.push(`<div class="fc-card"><h3>${names[key]}${r.low_confidence ? '<span class="badge-stale">历史序列短，置信度低</span>' : ""}</h3>
+      <div class="meta">${vsHist}</div>
+      <div class="fc-seq">${seq}</div>
+      ${seasons ? `<div class="meta">往季主高峰：${seasons}</div>` : ""}</div>`);
+  }
+  $("forecast-cards").innerHTML = html.join("");
 }
 
 function renderPathogens(d) {
@@ -215,13 +294,15 @@ function renderAnalysis(d) {
 }
 
 async function main() {
-  const [latest, trends] = await Promise.all([
+  const [latest, trends, forecast] = await Promise.all([
     fetch("data/latest.json?_=" + Date.now()).then(r => r.json()),
     fetch("data/trends.json?_=" + Date.now()).then(r => r.json()).catch(() => null),
+    fetch("data/forecast.json?_=" + Date.now()).then(r => r.json()).catch(() => null),
   ]);
   $("updated").textContent = `数据更新：${latest.updated}${(latest.sentinel?.stale || latest.cnic?.stale) ? "（部分源抓取失败，含旧数据）" : ""}`;
   renderKpis(latest);
-  if (trends) renderIli(trends);
+  if (trends) renderIli(trends, forecast);
+  if (forecast) renderForecast(forecast, trends);
   renderPathogens(latest);
   renderLab(latest);
   renderOutbreaks(latest);

@@ -67,6 +67,16 @@ main { max-width: 960px; margin: 0 auto; padding: 8px 16px 40px; }
 .city h3 { font-size: 0.95rem; margin-bottom: 4px; }
 .city .meta { color: var(--muted); font-size: 0.72rem; margin-bottom: 6px; }
 .city ol { margin-left: 18px; }
+.forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.fc-card { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.fc-card h3 { font-size: 0.95rem; margin-bottom: 4px; }
+.fc-card .meta { color: var(--muted); font-size: 0.72rem; margin: 4px 0; }
+.fc-seq { display: flex; gap: 8px; margin: 8px 0 2px; }
+.fc-step { flex: 1; text-align: center; background: var(--bg); border-radius: 6px; padding: 6px 2px; }
+.fc-week { font-size: 0.68rem; color: var(--muted); }
+.fc-val { font-size: 1.05rem; font-weight: 700; }
+.fc-range { font-size: 0.66rem; color: var(--muted); }
+.legend span.dash-note::before { content: ""; }
 .analysis { font-size: 0.88rem; white-space: pre-wrap; }
 .analysis h3 { font-size: 0.9rem; margin: 10px 0 4px; color: var(--muted); }
 .badge-stale {

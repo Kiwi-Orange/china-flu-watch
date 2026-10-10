@@ -1,6 +1,6 @@
 # 全国呼吸道传染病周报监测
 
-一个纯静态网站，聚合中国官方每周发布的呼吸道传染病监测数据：全国及南北方流感样病例（ILI%）水平、11 种呼吸道病原体检测阳性率、流感病毒型别构成、暴发疫情与重点城市动态。
+一个纯静态网站，聚合中国官方每周发布的呼吸道传染病监测数据：全国及南北方流感样病例（ILI%）水平、11 种呼吸道病原体检测阳性率、流感病毒型别构成、暴发疫情与重点城市动态，并基于多年历史序列给出 ILI% 未来 4 周统计预测。
 
 - 数据来源（均为公开页面，免鉴权）：
   - [中国疾控中心 · 全国急性呼吸道传染病哨点监测情况](https://www.chinacdc.cn/jksj/jksj04_14275/)（每周，HTML 表格）
@@ -14,7 +14,7 @@
 
 ```bash
 # 需要 Python 3 标准库 + 系统 pdftotext（macOS: brew install poppler；Debian/Ubuntu: apt install poppler-utils）
-python3 fetch.py               # 抓取数据，生成 data/latest.json、data/trends.json 并归档 CSV
+python3 fetch.py               # 抓取数据，生成 data/latest.json、trends.json、forecast.json 并归档 CSV
 python3 -m http.server 8000    # 本地预览
 # 打开 http://localhost:8000
 ```
@@ -25,11 +25,24 @@ python3 -m http.server 8000    # 本地预览
 
 ## 代码结构
 
-- `fetch.py`：主编排。调度各抓取模块，写 `data/latest.json` / `data/trends.json`，维护 `data/archive/` 归档
+- `fetch.py`：主编排。调度各抓取模块，写 `data/latest.json` / `data/trends.json`，维护 `data/archive/` 归档，并调用 `predict.py` 生成 `data/forecast.json`
 - `fetch_common.py`：HTTP 重试、HTML 表格解析、pdftotext 封装
 - `fetch_sentinel.py`：中疾控哨点监测周报（全国 + 南北方，11 种病原体）
 - `fetch_cnic.py`：国家流感中心流感周报 PDF（ILI% 含往年同期、实验室检测、暴发疫情）
 - `fetch_cities.py`：城市级源（重庆周更、上海月更）
+- `predict.py`：ILI% 短期预测（纯标准库统计外推，失败不阻断主流程）
+
+## ILI% 短期预测（forecast.json）
+
+方法（透明可复现的统计外推，非流行病动力学模型）：
+
+- 季节基线：历史同一 ISO 周的指数加权平均（年份权重半衰期 1 年），±2 周循环平滑
+- 异常回归：最近 4 周观测相对基线的偏差按 0.65^h 随预见期衰减（向季节均值回归）
+- 置信带：历史残差标准差随预见期放大，取 80% 区间（±1.28σ）
+- 历史少于 30 周的序列不预测；少于 90 周或不足 2 个完整季节的序列标记 `low_confidence`（目前仅"全国"序列，自 2025W24 起累积）
+- 季节高峰统计按"流感季"（当年 W27 至次年 W26，冬峰落在同一季内）取各季峰值周与峰值
+
+预测结果随每周抓取自动重算。ILI% 受气候、流行毒株、假期就诊行为等影响，短期外推无法预判突发波动，仅供参考。
 
 ## 降级与容错
 

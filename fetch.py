@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """主编排：抓取两个全国级周报源 + 已启用的城市级源，输出 data/latest.json、
-data/trends.json 并维护 data/archive/ 下的 CSV 长期归档。
+data/trends.json、data/forecast.json（predict.py）并维护 data/archive/ 下的 CSV 长期归档。
 
 降级策略（沿用花粉项目原则）：
 - 任一源失败 → 沿用上一份 latest.json 中对应部分，并标记 stale
@@ -282,6 +282,11 @@ def main():
             latest["cities"]["stale"] = True
 
     build_trends()
+    try:
+        import predict
+        predict.build_forecast()
+    except Exception as exc:
+        print("预测生成失败(不阻断): %s" % exc, file=sys.stderr)
     atomic_write(OUT_LATEST, json.dumps(latest, ensure_ascii=False, indent=1))
     print("latest.json 已更新 @ %s" % latest["updated"])
 

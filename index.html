@@ -23,6 +23,14 @@
     <div class="legend" id="ili-legend"></div>
   </section>
 
+  <section class="card" id="forecast-section" style="display:none">
+    <h2>ILI% 短期预测 <small id="forecast-range"></small></h2>
+    <p class="note">方法：季节基线（历史同周加权平均）+ 近期偏差衰减回归，给出未来 4 周点估计与 80% 区间。纯统计外推，不构成医疗建议。</p>
+    <div id="forecast-chart" class="chart"></div>
+    <div class="legend" id="forecast-legend"></div>
+    <div id="forecast-cards" class="forecast-grid"></div>
+  </section>
+
   <section class="card">
     <h2>本周病原体检测阳性率 <small id="pathogen-week"></small></h2>
     <p class="note">全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊流感样病例（ILI）与住院严重急性呼吸道感染（SARI）分列。</p>
