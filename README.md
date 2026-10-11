@@ -7,6 +7,7 @@
   - [国家流感中心 · 中国流感监测周报](https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/)（每周，HTML 摘要 + PDF 全文）
   - [重庆疾控 · 急性呼吸道传染病哨点监测](https://www.cqcdc.org/index.php?a=lists&catid=209)（每周，城市级）
   - [上海市卫健委 · 传染病疫情报告](https://wsjkw.sh.gov.cn/yqxx/index.html)（每月，含流感病例数，城市级）
+  - [天津市疾控局 · 工作动态](https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/)（每月，流感病例数在月报附件的分病种统计表 DOCX 里，城市级）
 - 更新机制：GitHub Actions 每周五凌晨（北京时间）运行 `fetch.py`，周六上午补抓一次（应对迟发），抓取数据并提交 `data/` 到仓库（见 `.github/workflows/update.yml`，也可在 Actions 页面手动触发）
 - 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；含预测回测诊断图、各流感季对比视图与病原体阳性率周度热力图）；界面中英双语，语言选择记入 localStorage
 
@@ -51,14 +52,14 @@ python3 -m http.server 8000    # 本地预览
 
 **走窗回测**：逐起点推进，每个起点只用 ≤t 的数据出预测，再与实际值比较。预测区间取组合误差的经验分位数，前 50% 起点标定 q10/q90，后 50% 作为留出期评估 80% 命中率（标定样本 <30 时改用按 √h 缩放的合并分位数）。
 
-2026-10 回测结果（每期组合全部 13 个模型，起点数：南方 250 / 北方 241）：
+2026-10 回测结果（每期组合全部 13 个模型，起点数：南方 277 / 北方 274）：
 
-| 区域 | 1 步 MAE（旧法 → 现流程） | 4 步 MAE | 80% 命中率（1/4 步，留出期） |
+| 区域 | 1 步 MAE（旧法 → 现流程） | 4 步 MAE | 80% 命中率（1/2/3/4 步，留出期） |
 |---|---|---|---|
-| 南方 | 0.94 → **0.77**（-18%） | 1.54 → **1.32** | 74% / 67% |
-| 北方 | 0.65 → **0.53**（-18%） | 1.13 → **0.97** | 73% / 71% |
+| 南方 | 0.93 → **0.71**（-24%） | 1.47 → **1.27** | 90% / 79% / 82% / 78% |
+| 北方 | 0.65 → **0.52**（-20%） | 1.02 → **0.88** | 86% / 84% / 83% / 83% |
 
-区间略偏窄（名义 80%、实测 67–76%），原因是留出期包含冬季大峰、误差大于标定前半段；页面上如实展示实测命中率，不做粉饰。
+（冬季大峰落在留出期时命中率会低于名义 80%，页面按预见期如实展示实测值。）
 
 预测结果随每周抓取自动重算。ILI% 受气候、流行毒株、假期就诊行为等影响，短期外推无法预判突发波动，仅供参考。
 
@@ -90,18 +91,18 @@ python3 backfill_sentinel.py            # 哨点监测周报，2024W46 起约 10
 - `lab-weekly.csv`：流感周报表 1 实验室检测。列：`year,week,region(south/north/total),tested,positive,positive_pct,a,h1n1pdm09,h3n2,a_unsubtyped,b,b_unlineaged,victoria,yamagata`
 - `outbreaks-weekly.csv`：暴发疫情。列：`year,week,week_total,week_by_type_json,season_total,season_south,season_north,season_regions_json`（暴发定义：一周内同一地区/单位 10 例及以上 ILI）
 - `city-weekly-top.csv`：城市周排行长表。列：`city,year,week,scene(outpatient/inpatient),rank,pathogen,pct`
-- `city-monthly-cases.csv`：城市月度法定传染病。列：`city,year,month,flu_cases,flu_deaths,covid_cases,total_cases,total_deaths`
+- `city-monthly-cases.csv`：城市月度法定传染病。列：`city,year,month,flu_cases,flu_deaths,covid_cases,total_cases,total_deaths`（`city` 为 shanghai / tianjin；天津的 `flu_cases` 来自月报附件的分病种统计表 DOCX，上海的来自月报正文表格）
 
 ### 口径注意
 
 - 哨点周报"全国 ILI%"与流感周报"南/北方 ILI%"来自两套监测网络，数值略有差异属正常
-- 上海月度"流行性感冒"为法定传染病报告发病数（丙类），与哨点阳性率口径完全不同，不可直接比较
-- 重庆为周更但发布滞后全国约 1–2 周
-- 上海卫健委站点仅境内网络可达：GitHub Actions 抓取会因 TLS 握手失败而沿用旧数据（标记 stale），上海数据靠境内本地运行 `python3 fetch.py` 刷新（月度更新，每月跑一次即可）
+- 上海、天津的月度"流行性感冒"为法定传染病报告发病数（丙类），与哨点阳性率口径完全不同，不可直接比较
+- 重庆为周更但发布滞后全国约 1–2 周；天津月报在次月中旬发布，且其站点（网宿 WAF）对高频抓取会返回 JS 挑战页，脚本已做 cookie 回带与退避重试
+- 上海卫健委、天津疾控局站点均仅境内网络可达：GitHub Actions 抓取会因 TLS/重定向失败而沿用旧数据（标记 stale），这些城市数据靠境内本地运行 `python3 fetch.py` 刷新（月度更新，每月跑一次即可）
 
 ### 未接入的源（调研结论）
 
-- 北京：疾控周报 2023 年底停发，现仅有月度概况且无流感单病种数字
+- **北京**：全市公开渠道**没有任何城市级流感量化指标**。呼吸道传染病周报 2023 年底停发（最后一期覆盖 2023-12-25~12-31，之后未恢复）；现行《北京市法定传染病报告情况》月报正文只有"共报告法定传染病 N 种 X 例，死亡 Y 例"+ 主要病种**名称**列表（含"流行性感冒"但无数字），拿不到发病数/ILI%/阳性率；`bjcdc.org` 本机与 Actions 均不可达（站点本身活着，只是转载卫健委月报）。故不接入（可选方案是新增一个口径不同的"法定传染病总量"指标，已放弃）。
 - 广东：省周报在 2026 年非流行季暂停，且历史文章链接不稳定
 - 深圳：自有流感指数 2022 年停发，现仅转载省报
 - 香港：CHP 流感速递每周更新且有 CSV（`chp.gov.hk/files/misc/flux_data.csv`），但该站需要境外网络可达；本机与部分网络环境访问失败，待验证后接入
@@ -126,10 +127,12 @@ A static site aggregating China's official weekly respiratory-disease surveillan
 - **ILI% by flu season** — seasons aligned from week 27 so the winter peak stays in one season; current season highlighted
 - **Pathogen test positivity** — 11 respiratory pathogens from sentinel hospitals, outpatient ILI and inpatient SARI
 - **Weekly pathogen positivity heatmap** — the same data as a weekly heatmap (88+ weeks × 11 pathogens)
-- **Key cities** — Chongqing (weekly) and Shanghai (monthly)
+- **Key cities** — Chongqing (weekly), Shanghai and Tianjin (monthly notifiable-disease reports, including influenza case counts)
 - **Official analysis** — verbatim Chinese text from the source reports, marked as such in English mode
 
 All charts support hover readouts.
+
+Municipality coverage: Chongqing, Shanghai and Tianjin are connected. Beijing is not — it publishes no city-level quantitative influenza indicator at all (the weekly respiratory report stopped at the end of 2023 and has not resumed; the current monthly report gives only the total notifiable-disease count plus a list of disease *names* that includes "influenza" without a number), so adding it would mean showing a non-comparable metric.
 
 ## Data sources (public pages, no auth)
 
@@ -137,6 +140,7 @@ All charts support hover readouts.
 - [National Influenza Center · China weekly influenza report](https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/) (weekly, HTML summary + PDF)
 - [Chongqing CDC](https://www.cqcdc.org/index.php?a=lists&catid=209) (weekly, city level)
 - [Shanghai Health Commission](https://wsjkw.sh.gov.cn/yqxx/index.html) (monthly, city level)
+- [Tianjin CDC Bureau](https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/) (monthly; the influenza figure lives in a DOCX attachment of the monthly report, city level)
 
 ## How it updates
 
@@ -169,14 +173,14 @@ python3 -m http.server 8000    # preview at http://localhost:8000
 
 **Walk-forward backtest**: at every origin the pipeline predicts using only data available then; intervals come from empirical quantiles of the combined errors (calibrated on the first half of origins, hit rate measured on the holdout half).
 
-October 2026 backtest (all 13 models combined; 250 origins for South, 241 for North):
+October 2026 backtest (all 13 models combined; 277 origins for South, 274 for North):
 
-| Region | 1-step MAE (v1 → now) | 4-step MAE | 80% interval hit rate (1/4-step, holdout) |
+| Region | 1-step MAE (v1 → now) | 4-step MAE | 80% interval hit rate (1/2/3/4-step, holdout) |
 |---|---|---|---|
-| South | 0.94 → **0.77** (−18%) | 1.54 → **1.32** | 74% / 67% |
-| North | 0.65 → **0.53** (−18%) | 1.13 → **0.97** | 73% / 71% |
+| South | 0.93 → **0.71** (−24%) | 1.47 → **1.27** | 90% / 79% / 82% / 78% |
+| North | 0.65 → **0.52** (−20%) | 1.02 → **0.88** | 86% / 84% / 83% / 83% |
 
-Intervals run a little narrow (nominal 80%, measured 67–76%) because the holdout window contains a winter peak with larger errors than the calibration half; the site reports the measured hit rate as-is.
+(When a winter peak falls inside the holdout window, coverage drops below the nominal 80%; the site reports the measured value per horizon.)
 
 Series with fewer than 30 weeks are not forecast; fewer than 90 weeks or fewer than 2 complete seasons are flagged `low_confidence` (currently only the national series, which starts at 2025W24). Season peaks are computed per flu season (week 27 through week 26 of the next year).
 

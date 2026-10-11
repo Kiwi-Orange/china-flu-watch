@@ -180,7 +180,7 @@ def archive_cnic(d):
 
 
 def archive_cities(cities):
-    """城市源归档：重庆周排行（长表）、上海月度病例数。"""
+    """城市源归档：重庆周排行（长表）、上海/天津月度病例数。"""
     rows = []
     cq = cities.get("chongqing")
     if cq and not cq.get("stale") and cq.get("year"):
@@ -191,16 +191,17 @@ def archive_cities(cities):
         merge_csv(CITY_TOP_CSV,
                   ["city", "year", "week", "scene", "rank", "pathogen", "pct"],
                   key_idx=[0, 1, 2, 3, 4], new_rows=rows, sort_idx=[1, 2, 3, 4])
-    sh = cities.get("shanghai")
-    if sh and not sh.get("stale") and sh.get("year"):
+    month_rows = []
+    for key in ("shanghai", "tianjin"):
+        c = cities.get(key)
+        if c and not c.get("stale") and c.get("year") and c.get("month"):
+            month_rows.append([key, c["year"], c["month"], c.get("flu_cases"), c.get("flu_deaths"),
+                               c.get("covid_cases"), c.get("total_cases"), c.get("total_deaths")])
+    if month_rows:
         merge_csv(CITY_MONTH_CSV,
                   ["city", "year", "month", "flu_cases", "flu_deaths", "covid_cases",
                    "total_cases", "total_deaths"],
-                  key_idx=[0, 1, 2],
-                  new_rows=[["shanghai", sh["year"], sh["month"], sh.get("flu_cases"),
-                             sh.get("flu_deaths"), sh.get("covid_cases"),
-                             sh.get("total_cases"), sh.get("total_deaths")]],
-                  sort_idx=[1, 2])
+                  key_idx=[0, 1, 2], new_rows=month_rows, sort_idx=[1, 2])
 
 
 def build_trends():

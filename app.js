@@ -71,7 +71,11 @@ const I18N = {
     city_in3: "住院前三：{list}",
     city_sh_meta: "{y}年{m}月法定传染病疫情 · 发布 {pub} · 月更",
     city_flu: "流行性感冒：{n} 例",
+    city_flu_d: "流行性感冒：{n} 例（死亡 {d}）",
     city_covid: "新型冠状病毒感染：{n} 例",
+    city_month_total: "全市法定传染病：{n} 例（死亡 {d}）",
+    city_class_split: "乙类 {b} 例 · 丙类 {c} 例",
+    city_top_c: "丙类发病数前三位：{list}",
     city_sh_note: "口径：法定传染病报告发病数（丙类含流感）。",
     city_none: "城市数据暂不可用",
     ana_h2: "官方分析与健康提示",
@@ -153,7 +157,11 @@ const I18N = {
     city_in3: "Top inpatient: {list}",
     city_sh_meta: "{y}-{m} notifiable disease report · published {pub} · monthly",
     city_flu: "Influenza: {n} cases",
+    city_flu_d: "Influenza: {n} cases ({d} deaths)",
     city_covid: "COVID-19: {n} cases",
+    city_month_total: "All notifiable diseases: {n} cases ({d} deaths)",
+    city_class_split: "Class B {b} · Class C {c}",
+    city_top_c: "Top 3 Class C: {list}",
     city_sh_note: "Basis: notifiable disease reports (Class C incl. influenza).",
     city_none: "City data unavailable",
     ana_h2: "Official Analysis & Health Notes",
@@ -181,7 +189,18 @@ const PATHOGEN_EN = {
   "博卡病毒": "Bocavirus", "呼吸道合胞病毒": "RSV", "腺病毒": "Adenovirus",
   "普通冠状病毒": "Common coronavirus", "肺炎支原体": "M. pneumoniae",
 };
-const pName = (n) => LANG === "en" ? (PATHOGEN_EN[n] || n) : n;
+const DISEASE_EN = {
+  "流行性感冒": "Influenza", "其他感染性腹泻病": "Other infectious diarrhea",
+  "手足口病": "Hand, foot and mouth disease", "新型冠状病毒感染": "COVID-19",
+  "病毒性肝炎": "Viral hepatitis", "肺结核": "Tuberculosis", "梅毒": "Syphilis",
+  "细菌性和阿米巴性痢疾": "Bacillary & amoebic dysentery", "流行性腮腺炎": "Mumps",
+  "水痘": "Chickenpox", "猩红热": "Scarlet fever", "布鲁氏菌病": "Brucellosis",
+  "艾滋病": "HIV/AIDS", "淋病": "Gonorrhea", "登革热": "Dengue", "猴痘": "Mpox",
+  "麻疹": "Measles", "百日咳": "Pertussis", "伤寒和副伤寒": "Typhoid & paratyphoid",
+  "疟疾": "Malaria", "血吸虫病": "Schistosomiasis", "流行性出血热": "Hemorrhagic fever with renal syndrome",
+  "流行性乙型脑炎": "Japanese encephalitis", "狂犬病": "Rabies",
+};
+const pName = (n) => LANG === "en" ? (PATHOGEN_EN[n] || DISEASE_EN[n] || n) : n;
 
 const $ = (id) => document.getElementById(id);
 const fmtPct = (v) => (v === null || v === undefined) ? "—" : v + "%";
@@ -607,6 +626,21 @@ function renderCities(d) {
       <div class="meta">${tf("city_sh_meta", { y: sh.year, m: sh.month, pub: sh.published || "" })}</div>
       <div>${tf("city_flu", { n: fmtNum(sh.flu_cases) })}</div>
       <div>${tf("city_covid", { n: fmtNum(sh.covid_cases) })}</div>
+      <div class="meta">${t("city_sh_note")}</div></div>`);
+  }
+  const tj = cities.tianjin;
+  if (tj) {
+    const flu = tj.flu_deaths != null
+      ? tf("city_flu_d", { n: fmtNum(tj.flu_cases), d: fmtNum(tj.flu_deaths) })
+      : tf("city_flu", { n: fmtNum(tj.flu_cases) });
+    html.push(`<div class="city"><h3>${LANG === "en" ? "Tianjin" : "天津"}${staleBadge(tj)}</h3>
+      <div class="meta">${tf("city_sh_meta", { y: tj.year, m: tj.month, pub: tj.published || "" })}</div>
+      <div>${flu}</div>
+      <div>${tf("city_month_total", { n: fmtNum(tj.total_cases), d: fmtNum(tj.total_deaths) })}</div>
+      ${tj.b_class_cases != null || tj.c_class_cases != null
+        ? `<div>${tf("city_class_split", { b: fmtNum(tj.b_class_cases), c: fmtNum(tj.c_class_cases) })}</div>` : ""}
+      ${(tj.top_c || []).length
+        ? `<div class="meta">${tf("city_top_c", { list: tj.top_c.map(pName).join(LANG === "en" ? ", " : "、") })}</div>` : ""}
       <div class="meta">${t("city_sh_note")}</div></div>`);
   }
   $("cities").innerHTML = html.join("") || `<p class="note">${t("city_none")}</p>`;

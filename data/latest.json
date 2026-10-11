@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-10 11:03:19 +08:00",
+ "updated": "2026-10-11 20:40:19 +08:00",
  "sentinel": {
   "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261008_1842095.html",
   "year": 2026,
@@ -380,8 +380,35 @@
    "covid_cases": 74631,
    "total_cases": 136249,
    "total_deaths": 16,
-   "stale": true
+   "stale": false
   },
-  "updated": "2026-10-10 11:04:35 +08:00"
+  "tianjin": {
+   "name": "天津",
+   "source_url": "https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/202609/t20260909_7370273.html",
+   "year": 2026,
+   "month": 8,
+   "published": "2026-09-09",
+   "total_cases": 18360,
+   "total_deaths": 0,
+   "b_class_cases": 11792,
+   "top_b": [
+    "新型冠状病毒感染",
+    "细菌性和阿米巴性痢疾",
+    "病毒性肝炎",
+    "肺结核",
+    "梅毒"
+   ],
+   "c_class_cases": 6568,
+   "top_c": [
+    "其他感染性腹泻病",
+    "流行性感冒",
+    "手足口病"
+   ],
+   "docx_url": "https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/202609/W020260909551372685509.docx",
+   "flu_cases": 1904,
+   "flu_deaths": 0,
+   "stale": false
+  },
+  "updated": "2026-10-11 20:41:25 +08:00"
  }
 }

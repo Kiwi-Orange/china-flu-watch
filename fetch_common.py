@@ -5,6 +5,7 @@
 缺失时相关数据源降级而不是整体失败。
 """
 
+import http.cookiejar
 import re
 import shutil
 import subprocess
@@ -18,18 +19,24 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; ChinaFluWatch/1.0; +github-ac
 TIMEOUT = 20
 RETRIES = 3
 
+# 带 cookie 的 opener：部分政府站点的 WAF（如天津 wsjk.tj.gov.cn 的网宿 WZWS）
+# 会先 302 + Set-Cookie 要求回带 cookie，不带 cookie 的客户端会陷入重定向循环。
+OPENER = urllib.request.build_opener(
+    urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(ROOT, "data")
 ARCHIVE_DIR = os.path.join(DATA_DIR, "archive")
 
 
-def fetch_bytes(url):
-    """GET 字节流，20s 超时，最多 3 次重试，指数退避。"""
+def fetch_bytes(url, headers=None):
+    """GET 字节流，20s 超时，最多 3 次重试，指数退避。headers 可覆盖默认 UA。"""
+    hdrs = dict(HEADERS, **(headers or {}))
     last_err = None
     for attempt in range(RETRIES):
         try:
-            req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+            req = urllib.request.Request(url, headers=hdrs)
+            with OPENER.open(req, timeout=TIMEOUT) as resp:
                 return resp.read()
         except Exception as exc:
             last_err = exc
@@ -39,8 +46,8 @@ def fetch_bytes(url):
     raise RuntimeError("多次请求失败 %s: %s" % (url, last_err))
 
 
-def fetch_text(url, encoding="utf-8"):
-    return fetch_bytes(url).decode(encoding, errors="replace")
+def fetch_text(url, encoding="utf-8", headers=None):
+    return fetch_bytes(url, headers=headers).decode(encoding, errors="replace")
 
 
 TAG_RE = re.compile(r"<[^>]+>")
