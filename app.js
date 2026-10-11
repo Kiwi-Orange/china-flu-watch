@@ -62,8 +62,15 @@ const I18N = {
     raw_show: "查看完整历史原始走势（每周数值，2019 年至今）",
     south: "南方", north: "北方", national: "全国",
     south_p: "南方省份", north_p: "北方省份",
-    path_h2: "本周病原体<span class=\"term\" data-term=\"positivity\">检测阳性率</span>",
-    path_note: "全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊<span class=\"term\" data-term=\"ili\">流感样病例</span>与住院<span class=\"term\" data-term=\"sari\">严重急性呼吸道感染</span>分列。",
+    path_h2: "本周病原体<span class=\"term\" data-term=\"positivity\">检测阳性率</span> vs 去年同期",
+    path_note: "全国哨点医院呼吸道样本核酸检测阳性率。灰带＝去年同期（同一日历年 ±3 周）的最高–最低范围，灰刻度＝中位；圆点＝本周数值，落在灰带之外即标出。两点说明：哨点周报只公布阳性率、不公布各病原体检测份数，因此算不出置信区间；归档目前只有约两年，参照集每周仅约 7 个周样本且来自单一季节，所以标记只作提示（悬浮可看参照窗口、样本数与分位）。",
+    path_above: "↑ 高于去年同期",
+    path_below: "↓ 低于去年同期",
+    path_ref_head: "参照：去年同期同期段（同一日历年 ±3 周）",
+    path_legend: "● 本周数值　▬ 去年同期范围（±3 周）　│ 去年同期中位",
+    path_tip: "本周 {v}%",
+    path_ref: "历年同期 {lo}–{hi}%（中位 {med}，{n} 个样本）",
+    path_pct: "第 {p} 百分位",
     outp: "门急诊",
     hm_h2: "病原体<span class=\"term\" data-term=\"positivity\">阳性率</span>周度热力图",
     hm_note: "哨点周报各周核酸检测阳性率，颜色越红越高，灰色为无数据。悬浮可查看具体数值。",
@@ -155,8 +162,15 @@ const I18N = {
     raw_show: "Show the full raw history (weekly values, 2019 onwards)",
     south: "South", north: "North", national: "National",
     south_p: "South", north_p: "North",
-    path_h2: "Pathogen <span class=\"term\" data-term=\"positivity\">test positivity</span> this week",
-    path_note: "Nucleic-acid test positivity (%) at national sentinel hospitals; outpatient <span class=\"term\" data-term=\"ili\">ILI</span> and inpatient <span class=\"term\" data-term=\"sari\">SARI</span> shown separately.",
+    path_h2: "Pathogen <span class=\"term\" data-term=\"positivity\">test positivity</span> this week vs last year",
+    path_note: "Nucleic-acid test positivity at national sentinel hospitals. Gray band = highest–lowest range in the same weeks (±3) of last season, gray tick = its median; the dot is this week's value and is flagged when it falls outside the band. Two caveats: the sentinel report publishes positivity only, not test counts per pathogen, so no confidence interval can be computed; and the archive only spans about two years, so the reference is ~7 weekly samples from a single season — treat the flag as a hint (hover for the reference window, sample size and percentile).",
+    path_above: "↑ above last year",
+    path_below: "↓ below last year",
+    path_ref_head: "Reference: the same weeks (±3) of last season",
+    path_legend: "● this week　▬ last year's range (±3 weeks)　│ last year's median",
+    path_tip: "This week {v}%",
+    path_ref: "Same weeks of past seasons {lo}–{hi}% (median {med}, n={n})",
+    path_pct: "percentile {p}",
     outp: "Outp.",
     hm_h2: "Weekly pathogen <span class=\"term\" data-term=\"positivity\">positivity</span> heatmap",
     hm_note: "Weekly nucleic-acid positivity from sentinel reports; darker red = higher, gray = no data. Hover for values.",
@@ -431,32 +445,6 @@ function isoDate(y, w) {
   return d;
 }
 
-/* ---------- 横向条形图 ---------- */
-function hBarChart(container, items, opts) {
-  const rowH = opts.rowH || 30, W = 880, P = { l: opts.labelW || 110, r: 135, t: 6, b: 6 };
-  const H = P.t + P.b + items.length * rowH;
-  const max = Math.max(...items.flatMap(it => it.bars.map(b => b.value)), 0) || 1;
-  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}` });
-  const bw = (W - P.l - P.r) / max;
-  items.forEach((it, i) => {
-    const y = P.t + i * rowH;
-    const label = svgEl("text", { x: P.l - 8, y: y + rowH / 2 + 4, "text-anchor": "end", class: "bar-label" });
-    label.textContent = it.label;
-    svg.appendChild(label);
-    const bh = (rowH - 8) / it.bars.length;
-    it.bars.forEach((b, j) => {
-      svg.appendChild(svgEl("rect", {
-        x: P.l, y: y + 4 + j * bh, width: Math.max(b.value * bw, 0.5), height: bh - 2, fill: b.color, rx: 2 }));
-      if (j === 0) {
-        const txt = svgEl("text", { x: P.l + Math.max(b.value * bw, 0.5) + 4, y: y + 4 + bh - 4, class: "bar-value" });
-        txt.textContent = b.text || "";
-        svg.appendChild(txt);
-      }
-    });
-  });
-  container.appendChild(svg);
-}
-
 /* ---------- 渲染 ---------- */
 function renderKpis(d) {
   const s = d.sentinel || {}, c = d.cnic || {};
@@ -533,6 +521,41 @@ const median = (v) => {
   const a = v.slice().sort((x, y) => x - y);
   return a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2;
 };
+
+const wkIdx = (y, w) => Math.round(isoDate(y, w).getTime() / 604800000);
+
+/* 历年同期参照分布：同一日历年 ±3 周、且排除最近 6 周（避免与本周自身比较）。
+   哨点周报只公布阳性率、不公布各病原体检测份数，因此这里给"范围+中位+分位"而非置信区间。 */
+function seasonalRef(pathogens, name, scene, year, week, curVal, win = 3, exclude = 6) {
+  const all = (pathogens[name] || []).filter(p => p[scene] != null);
+  if (all.length < 8) return null;
+  const cur = wkIdx(year, week);
+  const vals = [];
+  for (const p of all) {
+    const i = wkIdx(p.year, p.week);
+    if (cur - i < exclude) continue;                 // 最近 6 周不看（避免与本周自身比较）
+    const d = Math.abs(i - cur) % 52;
+    if (Math.min(d, 52 - d) > win) continue;         // 只看同一日历年同期
+    vals.push(p[scene]);
+  }
+  if (vals.length < 5) return null;
+  vals.sort((a, b) => a - b);
+  const acc = [];                                   // 参照窗口的起止（归档仅约两年，需精确标注）
+  for (const p of all) {
+    const i = wkIdx(p.year, p.week);
+    if (cur - i < exclude) continue;
+    const d = Math.abs(i - cur) % 52;
+    if (Math.min(d, 52 - d) > win) continue;
+    acc.push([p.year, p.week]);
+  }
+  acc.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  return {
+    lo: vals[0], hi: vals[vals.length - 1],
+    med: Math.round(median(vals) * 10) / 10, n: vals.length,
+    from: acc[0], to: acc[acc.length - 1],
+    pct: Math.round(100 * vals.filter(v => v <= curVal).length / vals.length),
+  };
+}
 
 /* 当前值在历年同期的位置：范围与中位（比只跟均值比更有信息量） */
 function histSameWeek(tr, scope, curSy, sw0) {
@@ -772,23 +795,86 @@ function renderHeatmap(tr, scene) {
     { vmax, colLabel: (k) => weekMap.get(k), labelW: 132 });
 }
 
-function renderPathogens(d) {
+/* 点＋历年同期区间图：圆点＝本周值，灰带＝历年同期最高–最低，灰刻度＝中位 */
+function dotRangeChart(container, rows) {
+  const W = 880, rowH = 32, P = { l: 132, r: 168, t: 22, b: 8 };
+  const H = P.t + P.b + rows.length * rowH;
+  const xmax = Math.max(1, ...rows.flatMap(r => [r.value, r.hi == null ? 0 : r.hi])) * 1.08;
+  const X = (v) => P.l + v / xmax * (W - P.l - P.r);
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}` });
+  const step = xmax > 24 ? 10 : xmax > 10 ? 5 : 2;
+  for (let v = 0; v <= xmax; v += step) {
+    svg.appendChild(svgEl("line", { x1: X(v), x2: X(v), y1: P.t - 8, y2: H - P.b, stroke: "#e5e7eb" }));
+    const tk = svgEl("text", { x: X(v), y: P.t - 12, "text-anchor": "middle", class: "axis-label" });
+    tk.textContent = v + "%";
+    svg.appendChild(tk);
+  }
+  rows.forEach((r, i) => {
+    const yc = P.t + i * rowH + rowH / 2;
+    const lab = svgEl("text", { x: P.l - 8, y: yc + 4, "text-anchor": "end", class: "bar-label" });
+    lab.textContent = r.label;
+    svg.appendChild(lab);
+    if (r.lo != null && r.hi != null) {
+      svg.appendChild(svgEl("rect", { x: X(r.lo), y: yc - 4, width: Math.max(X(r.hi) - X(r.lo), 1.5),
+                                     height: 8, rx: 4, fill: "#e5e7eb" }));
+      if (r.med != null)
+        svg.appendChild(svgEl("line", { x1: X(r.med), x2: X(r.med), y1: yc - 7, y2: yc + 7,
+                                        stroke: "#9ca3af", "stroke-width": 1.5 }));
+    }
+    const color = r.flag === "high" ? "#b91c1c" : r.flag === "low" ? "#1d4ed8" : "var(--flu)";
+    svg.appendChild(svgEl("circle", { cx: X(r.value), cy: yc, r: 5, fill: color }));
+    const anchor = Math.max(X(r.value), r.hi != null ? X(r.hi) : 0) + 9;
+    const val = svgEl("text", { x: anchor, y: yc + 4, class: "bar-value" });
+    val.textContent = `${r.value}%` +
+      (r.wow == null ? "" : `  ${r.wow > 0 ? "↑" : r.wow < 0 ? "↓" : "→"}${Math.abs(r.wow)}`);
+    svg.appendChild(val);
+    if (r.flag) {
+      const tag = svgEl("text", { x: W - 6, y: yc + 4, "text-anchor": "end", class: "flag-tag" });
+      tag.setAttribute("fill", r.flag === "high" ? "#b91c1c" : "#1d4ed8");
+      tag.textContent = t(r.flag === "high" ? "path_above" : "path_below");
+      svg.appendChild(tag);
+    }
+    const hit = svgEl("rect", { x: P.l, y: P.t + i * rowH, width: W - P.l, height: rowH, fill: "transparent" });
+    hit.addEventListener("mousemove", (e) => showTip(e.pageX, e.pageY, pathogenTip(r)));
+    hit.addEventListener("mouseleave", hideTip);
+    svg.appendChild(hit);
+  });
+  container.appendChild(svg);
+}
+
+function pathogenTip(r) {
+  let html = `<b>${r.label}</b><br>${tf("path_tip", { v: r.value })}`;
+  if (r.wow != null) html += `　${r.wow > 0 ? "↑" : r.wow < 0 ? "↓" : "→"}${Math.abs(r.wow)}`;
+  if (r.lo != null) {
+    const span = r.from ? `（${fmtDate(isoDate(r.from[0], r.from[1]))}–${fmtDate(isoDate(r.to[0], r.to[1]))}）` : "";
+    html += `<br>${t("path_ref_head")}${span}<br>${tf("path_ref", { lo: r.lo, hi: r.hi, med: r.med, n: r.n })}` +
+            (r.pct == null ? "" : `<br>${tf("path_pct", { p: r.pct })}`);
+  }
+  return html;
+}
+
+/* 本周病原体阳性率：与历年同期比，而不是只看排名 */
+function renderPathogens(d, tr, scene) {
   const s = d.sentinel || {};
   $("pathogen-week").textContent = s.year ? `（${fmtYW(s.year, s.week)}）` : "";
-  const items = (s.pathogens || []).map(p => ({
-    label: pName(p.name),
-    bars: [
-      { value: p.outpatient ?? 0, color: "var(--flu)", text: "" },
-      { value: p.inpatient ?? 0, color: "#f3b0a9" },
-    ],
-    _p: p,
-  })).sort((a, b) => b.bars[0].value - a.bars[0].value);
-  for (const it of items) {
-    const p = it._p, w = p.outpatient_wow;
-    it.bars[0].text = `${t("outp")} ${p.outpatient}%  ${w > 0 ? "↑" : w < 0 ? "↓" : "→"}${Math.abs(w ?? 0)}`;
+  const ph = (tr && tr.pathogens) || {};
+  const rows = [];
+  for (const p of s.pathogens || []) {
+    if (p[scene] == null) continue;
+    const ref = seasonalRef(ph, p.name, scene, s.year, s.week, p[scene]);
+    const flag = ref ? (p[scene] > ref.hi ? "high" : p[scene] < ref.lo ? "low" : null) : null;
+    rows.push({
+      label: pName(p.name), value: p[scene],
+      wow: scene === "outpatient" ? p.outpatient_wow : p.inpatient_wow,
+      lo: ref ? ref.lo : null, hi: ref ? ref.hi : null, med: ref ? ref.med : null,
+      n: ref ? ref.n : null, pct: ref ? ref.pct : null,
+      from: ref ? ref.from : null, to: ref ? ref.to : null, flag,
+    });
   }
+  rows.sort((a, b) => b.value - a.value);
   $("pathogen-chart").innerHTML = "";
-  if (items.length) hBarChart($("pathogen-chart"), items, { rowH: 34, labelW: 120 });
+  if (rows.length) dotRangeChart($("pathogen-chart"), rows);
+  $("pathogen-legend").innerHTML = `<span class="dash-note">${t("path_legend")}</span>`;
 }
 
 function renderCities(d) {
@@ -855,7 +941,7 @@ function translateStatic() {
 }
 
 let LATEST = null, TRENDS = null, FORECAST = null;
-let seasonScope = "south", heatScene = "outpatient", backtestScope = "south";
+let seasonScope = "south", heatScene = "outpatient", backtestScope = "south", pathScene = "outpatient";
 
 function renderAll() {
   translateStatic();
@@ -874,7 +960,7 @@ function renderAll() {
     renderForecast(FORECAST, TRENDS);
     renderBacktest(FORECAST, TRENDS, backtestScope);
   }
-  renderPathogens(LATEST);
+  renderPathogens(LATEST, TRENDS, pathScene);
   renderCities(LATEST);
   renderAnalysis(LATEST);
 }
@@ -899,6 +985,7 @@ async function main() {
   });
   for (const [id, fn] of [["season-scope", (k) => { seasonScope = k; renderSeasons(TRENDS, k, FORECAST); }],
                           ["heatmap-scene", (k) => { heatScene = k; renderHeatmap(TRENDS, k); }],
+                          ["pathogen-scene", (k) => { pathScene = k; renderPathogens(LATEST, TRENDS, k); }],
                           ["backtest-scope", (k) => { backtestScope = k; renderBacktest(FORECAST, TRENDS, k); }]]) {
     const el = $(id);
     if (!el) continue;

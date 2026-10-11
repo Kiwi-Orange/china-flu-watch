@@ -59,8 +59,12 @@
 
   <section class="card">
     <h2><span data-i18n-html="path_h2">本周病原体检测阳性率</span> <small id="pathogen-week"></small></h2>
-    <p class="note" data-i18n-html="path_note">全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊流感样病例（ILI）与住院严重急性呼吸道感染（SARI）分列。</p>
+    <p class="note" data-i18n-html="path_note">全国哨点医院呼吸道样本核酸检测阳性率。灰带＝历年同期范围，灰刻度＝中位；圆点＝本周数值，落在灰带之外即标出。</p>
+    <div class="seg" id="pathogen-scene">
+      <button data-k="outpatient" data-i18n="hm_out">门急诊 ILI</button><button data-k="inpatient" data-i18n="hm_in">住院 SARI</button>
+    </div>
     <div id="pathogen-chart" class="chart"></div>
+    <div class="legend" id="pathogen-legend"></div>
   </section>
 
   <section class="card">
