@@ -346,32 +346,92 @@ def run_backtest(S, specs):
 
 
 # ---------- 嵌套（real-time）逐预见期选模型 ----------
-# ---------- 走窗组合（每期等权平均所有可出预测的候选模型） ----------
-def walk_forward(S, specs, results):
-    """逐起点推进：每个预见期把当时所有能出预测的候选模型等权平均。
+# ---------- 走窗组合（按可观测误差指数加权，权重强度由数据自选） ----------
+GAMMAS = (0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 8.0)   # 0 = 等权；越大越偏向历史误差小的模型
+MIN_W_OBS = 5      # 候选模型进入加权所需的最少已观测误差
+MIN_G_OBS = 8      # 选择 γ 所需的最少已观测组合误差
+MIN_COV_EVAL = 20  # 留出期样本少于此数时不报命中率（数字无统计意义）
+DEFAULT_GAMMA = 1.0
 
-    这是一个"先验"组合规则——不做模型挑选，因此报出的误差没有任何选择性偏差；
-    回测显示它比挑选单个最优模型更稳（组合优于择优）。clip 仅作离群保护。
-    → {h: [{"t","pred","err","members"}]}
+
+def _weights(members, maes, gamma):
+    """w_n ∝ exp(-γ·MAE_n)；误差样本不足的成员按已有成员的平均 MAE 处理。"""
+    known = [n for n in members if n in maes]
+    if gamma == 0.0 or not known:
+        return {n: 1.0 for n in members}
+    ref = sum(maes[n] for n in known) / len(known)
+    return {n: math.exp(-gamma * maes.get(n, ref)) for n in members}
+
+
+def walk_forward(S, specs, results):
+    """逐起点推进：每个预见期把候选模型按"当时已可见的误差"指数加权平均。
+
+    权重强度 γ 也只用当时可见的组合误差从 GAMMAS 里挑——不看未来，因此误差序列
+    没有选择性偏差；实测（2026-10）γ 在 1 步自动偏大、3–4 步退回接近等权。
+    → (walk, final)   final = {"gamma": {h: γ}, "mae": {name: {h: MAE}}}
     """
     names = [sp["name"] for sp in specs]
     origins = sorted(set().union(*[set(results[n][h]) for n in names for h in range(1, HORIZON + 1)]))
+    cand_stat = {n: {h: [0.0, 0] for h in range(1, HORIZON + 1)} for n in names}
+    cand_pend = {h: [] for h in range(1, HORIZON + 1)}      # [(可见时点, 模型, 误差)]
+    comb_stat = {g: {h: [0.0, 0] for h in range(1, HORIZON + 1)} for g in GAMMAS}
+    comb_pend = {g: {h: [] for h in range(1, HORIZON + 1)} for g in GAMMAS}
     out = {h: [] for h in range(1, HORIZON + 1)}
+    chosen = {h: DEFAULT_GAMMA for h in range(1, HORIZON + 1)}
     run_max = 0.0
+
     for t in origins:
         if t in S:
             run_max = max(run_max, S[t])
         cap = run_max * 1.6 if run_max else 100.0
+        # 结算此刻已可见的误差（目标周已过去）
+        for h in range(1, HORIZON + 1):
+            keep = []
+            for (obst, n, e) in cand_pend[h]:
+                if obst <= t:
+                    cand_stat[n][h][0] += abs(e)
+                    cand_stat[n][h][1] += 1
+                else:
+                    keep.append((obst, n, e))
+            cand_pend[h] = keep
+        for g in GAMMAS:
+            for h in range(1, HORIZON + 1):
+                keep = []
+                for (obst, e) in comb_pend[g][h]:
+                    if obst <= t:
+                        comb_stat[g][h][0] += abs(e)
+                        comb_stat[g][h][1] += 1
+                    else:
+                        keep.append((obst, e))
+                comb_pend[g][h] = keep
         for h in range(1, HORIZON + 1):
             members = [n for n in names if t in results[n][h]]
             if not members:
                 continue
-            pred = sum(min(max(results[n][h][t], 0.1), cap) for n in members) / len(members)
+            preds = {n: min(max(results[n][h][t], 0.1), cap) for n in members}
+            maes = {n: cand_stat[n][h][0] / cand_stat[n][h][1]
+                    for n in members if cand_stat[n][h][1] >= MIN_W_OBS}
+            combos = {}
+            for g in GAMMAS:
+                w = _weights(members, maes, g)
+                combos[g] = sum(w[n] * preds[n] for n in members) / sum(w.values())
+            usable = [g for g in GAMMAS if comb_stat[g][h][1] >= MIN_G_OBS]
+            g_sel = min(usable, key=lambda g: comb_stat[g][h][0] / comb_stat[g][h][1]) if usable else DEFAULT_GAMMA
+            chosen[h] = g_sel
             obs = S.get(t + h)
-            out[h].append({"t": t, "pred": pred,
-                           "err": (obs - pred) if obs is not None else None,
-                           "members": members})
-    return out
+            out[h].append({"t": t, "pred": combos[g_sel],
+                           "err": (obs - combos[g_sel]) if obs is not None else None,
+                           "members": members, "gamma": g_sel})
+            if obs is not None:
+                for g in GAMMAS:
+                    comb_pend[g][h].append((t + h, abs(obs - combos[g])))
+                for n in members:
+                    cand_pend[h].append((t + h, n, obs - preds[n]))
+
+    final = {"gamma": dict(chosen),
+             "mae": {n: {h: (cand_stat[n][h][0] / cand_stat[n][h][1]) if cand_stat[n][h][1] else None
+                         for h in range(1, HORIZON + 1)} for n in names}}
+    return out, final
 
 
 # ---------- 误差统计与区间 ----------
@@ -443,8 +503,9 @@ def metrics(walk, cov):
         row = {"h": h, "mae": round(mae, 2), "rmse": round(rmse, 2), "n": len(errs),
                "members": len(walk[h][-1]["members"]) if walk[h] else 0}
         if h in cov:
-            row["coverage"] = round(cov[h][0], 2)
             row["n_eval"] = cov[h][1]
+            if cov[h][1] >= MIN_COV_EVAL:      # 留出样本太少时命中率无统计意义，不报
+                row["coverage"] = round(cov[h][0], 2)
         out.append(row)
     return out
 
@@ -508,27 +569,28 @@ def predict_one(S, spec, t, h):
     return max(sum(b * v for b, v in zip(beta, x)), 0.1)
 
 
-def forecast_points(S, specs, q):
-    """生产预测：每个预见期等权平均所有能出预测的候选模型（与回测口径一致）。"""
+def forecast_points(S, specs, q, final):
+    """生产预测：与回测同一口径——按最近可见的 MAE 与自动选定的 γ 指数加权组合。"""
     t = sorted(S)[-1]
     cap = max(S.values()) * 1.6 if S else 100.0
     pts = []
     members_used = {}
     for h in range(1, HORIZON + 1):
-        preds = []
-        members = []
+        preds, members = {}, []
         for sp in specs:
             p = predict_one(S, sp, t, h)
             if p is not None:
-                preds.append(min(max(p, 0.1), cap))
+                preds[sp["name"]] = min(max(p, 0.1), cap)
                 members.append(sp["name"])
         if not preds:
             break
-        pred = sum(preds) / len(preds)
+        maes = {n: m for n, m in ((n, (final["mae"].get(n) or {}).get(h)) for n in members) if m is not None}
+        w = _weights(members, maes, final["gamma"].get(h, DEFAULT_GAMMA))
+        pred = sum(w[n] * preds[n] for n in members) / sum(w.values())
         members_used[h] = members
         lo_q, hi_q = q.get(h, (-1.28, 1.28))
-        y, w = index_to_yw(t + h)
-        pts.append({"year": y, "week": w, "pct": round(pred, 1),
+        y, w2 = index_to_yw(t + h)
+        pts.append({"year": y, "week": w2, "pct": round(pred, 1),
                     "lo": round(max(pred + lo_q, 0.0), 1),
                     "hi": round(max(pred + hi_q, 0.0), 1)})
     return pts, members_used
@@ -563,10 +625,10 @@ def analyze_scope(S):
         return None
     specs = candidate_specs()
     results = run_backtest(S, specs)
-    walk = walk_forward(S, specs, results)
+    walk, final = walk_forward(S, specs, results)
     q, interval_method = interval_quantiles(walk)
     cov = coverage_holdout(walk)
-    pts, members_used = forecast_points(S, specs, q)
+    pts, members_used = forecast_points(S, specs, q, final)
     if not pts:
         return None
     t = sorted(S)[-1]
@@ -587,7 +649,8 @@ def analyze_scope(S):
         "points": pts,
         "low_confidence": len(S) < LOW_CONF_POINTS or len(seasons) < 2,
         "seasons": seasons,
-        "members": [{"h": h, "models": members_used.get(h, [])} for h in range(1, HORIZON + 1)],
+        "members": [{"h": h, "models": members_used.get(h, []),
+                     "gamma": final["gamma"].get(h, DEFAULT_GAMMA)} for h in range(1, HORIZON + 1)],
         "backtest": {
             "n": len(errors_of(walk, 1)),
             "interval_method": interval_method,
@@ -627,7 +690,8 @@ def build_forecast():
         print("预测 %s: 自 %dW%d 起 %s" % (
             SCOPES[scope], r["from"]["year"], r["from"]["week"],
             " ".join("%g" % p["pct"] for p in r["points"])))
-        print("   每期集成模型数: %s | 嵌套回测 %d 起点 | 每期 MAE %s | 旧法 MAE %s | 命中率 %s | 区间法 %s%s" % (
+        print("   每期权重强度 γ: %s | 集成模型数: %s | 回测 %d 起点 | 每期 MAE %s | 旧法 MAE %s | 命中率 %s | 区间法 %s%s" % (
+            "/".join(str(m["gamma"]) for m in r["members"]),
             "/".join(str(len(m["models"])) for m in r["members"]),
             bt["n"],
             "/".join(str(m["mae"]) for m in bt["by_horizon"]),

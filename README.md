@@ -48,16 +48,22 @@ python3 -m http.server 8000    # 本地预览
 
 拟合用岭回归（正规方程增量累积 + 高斯消元，纯标准库，无第三方依赖），λ 固定 1。
 
-**为什么是等权组合而不是挑最优模型**：逐预见期挑选单个最优模型在回测里并不比等权组合更好，而且挑选会用"将来的误差"决定"过去的模型"，报出的精度偏乐观。等权组合是先验规则，不做任何挑选，因此回测误差就是这套流程当时真实会交付的精度。
+**怎么组合（权重怎么算）**：每个预见期把当时能出预测的候选模型加权平均，权重 `w_i ∝ exp(−γ·MAE_i)`——历史误差越小的模型权重越高。其中
+
+- `MAE_i` 只用"该起点当时已经能观测到"的误差估计（误差要等目标周过去才可见），因此不看未来、没有选择性偏差；
+- 权重强度 `γ` 也由数据自选：每个起点在 `γ ∈ {0, 0.5, 1, 2, 3, 5, 8}` 里挑"当时可见误差最小"的那个（`γ = 0` 即等权）。实测结果是 1 步自动偏大（南方 γ=5、北方 γ=8）、3–4 步退回接近等权（γ≤1），这与"权重估计噪声大时应向等权收缩"的经典结论一致；
+- 集成成员不足 5 个观测误差的模型按已入选成员的平均 MAE 处理。
+
+实测：按此加权后 1 步 MAE 从等权的 0.71/0.52（南方/北方）降到 **0.60/0.45**；而"逐预见期挑单个最优模型"在 2 步以上反而更差（南方 4 步 1.41 vs 加权 1.28），所以没有采用挑选。
 
 **走窗回测**：逐起点推进，每个起点只用 ≤t 的数据出预测，再与实际值比较。预测区间取组合误差的经验分位数，前 50% 起点标定 q10/q90，后 50% 作为留出期评估 80% 命中率（标定样本 <30 时改用按 √h 缩放的合并分位数）。
 
-2026-10 回测结果（每期组合全部 13 个模型，起点数：南方 277 / 北方 274）：
+2026-10 回测结果（13 个候选模型按上述加权组合，起点数：南方 277 / 北方 274）：
 
-| 区域 | 1 步 MAE（旧法 → 现流程） | 4 步 MAE | 80% 命中率（1/2/3/4 步，留出期） |
-|---|---|---|---|
-| 南方 | 0.93 → **0.71**（-24%） | 1.47 → **1.27** | 90% / 79% / 82% / 78% |
-| 北方 | 0.65 → **0.52**（-20%） | 1.02 → **0.88** | 86% / 84% / 83% / 83% |
+| 区域 | 各预见期 MAE：旧法 → 现流程 | 80% 命中率（1/2/3/4 步，留出期） |
+|---|---|---|
+| 南方 | 0.93 → **0.60** / 1.22 → **0.93** / 1.43 → **1.17** / 1.47 → **1.28**（-35%/-24%/-18%/-13%） | 89% / 77% / 84% / 78% |
+| 北方 | 0.65 → **0.45** / 0.84 → **0.68** / 1.00 → **0.83** / 1.02 → **0.88**（-31%/-19%/-17%/-14%） | 88% / 84% / 83% / 83% |
 
 （冬季大峰落在留出期时命中率会低于名义 80%，页面按预见期如实展示实测值。）
 
@@ -169,16 +175,22 @@ python3 -m http.server 8000    # preview at http://localhost:8000
 
 **13 candidate models**, each fit only on data available at the time: a seasonal baseline with fixed anomaly decay (`clim`, the first version — kept as reference), Fourier-harmonic ridge regressions (`harmK`), harmonic + recent-level direct regressions (`arK`), the same plus last-year's same week (`fullK`), and decomposition models — harmonic baseline plus an AR anomaly whose persistence ρ is estimated from the data (`decK` / `decc`). All fitting is ridge regression solved by incremental normal equations and Gaussian elimination — pure standard library, no third-party dependencies.
 
-**Why an equal-weight combination instead of picking the best model**: per-horizon model picking did not beat equal-weight combination in the backtest, and picking uses future errors to choose past models, which flatters the reported accuracy. Equal weighting is an a priori rule, so the walk-forward errors are exactly what this pipeline would have delivered at the time.
+**How the models are combined (how the weights are computed)**: at each horizon the candidates are averaged with weights `w_i ∝ exp(−γ·MAE_i)` — models with smaller historical errors get more weight, where
+
+- `MAE_i` uses only errors that were *observable at that origin* (an error becomes visible once its target week has passed), so nothing future is used and there is no selection bias;
+- the weight strength `γ` is itself chosen from `{0, 0.5, 1, 2, 3, 5, 8}` per origin and horizon by the smallest observable combined error (`γ = 0` means equal weights). In practice the 1-step horizon picks large γ (South 5, North 8) while 3–4-step horizons shrink back to near-equal weights (γ ≤ 1) — matching the classical result that noisy weight estimates should be shrunk toward equal weights;
+- members with fewer than 5 observed errors are assigned the average MAE of those that qualify.
+
+Measured: this weighting cuts 1-step MAE from 0.71/0.52 (equal weights, South/North) to **0.60/0.45**; picking the single best model per horizon is worse beyond 2 steps (South 4-step 1.41 vs 1.28), so it was not used.
 
 **Walk-forward backtest**: at every origin the pipeline predicts using only data available then; intervals come from empirical quantiles of the combined errors (calibrated on the first half of origins, hit rate measured on the holdout half).
 
-October 2026 backtest (all 13 models combined; 277 origins for South, 274 for North):
+October 2026 backtest (13 candidates combined with the weights above; 277 origins for South, 274 for North):
 
-| Region | 1-step MAE (v1 → now) | 4-step MAE | 80% interval hit rate (1/2/3/4-step, holdout) |
-|---|---|---|---|
-| South | 0.93 → **0.71** (−24%) | 1.47 → **1.27** | 90% / 79% / 82% / 78% |
-| North | 0.65 → **0.52** (−20%) | 1.02 → **0.88** | 86% / 84% / 83% / 83% |
+| Region | MAE per horizon: v1 → now | 80% interval hit rate (1/2/3/4-step, holdout) |
+|---|---|---|
+| South | 0.93 → **0.60** / 1.22 → **0.93** / 1.43 → **1.17** / 1.47 → **1.28** (−35%/−24%/−18%/−13%) | 89% / 77% / 84% / 78% |
+| North | 0.65 → **0.45** / 0.84 → **0.68** / 1.00 → **0.83** / 1.02 → **0.88** (−31%/−19%/−17%/−14%) | 88% / 84% / 83% / 83% |
 
 (When a winter peak falls inside the holdout window, coverage drops below the nominal 80%; the site reports the measured value per horizon.)
 
