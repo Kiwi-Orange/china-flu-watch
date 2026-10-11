@@ -52,10 +52,11 @@ const I18N = {
     fc_peak_item: "{season} 季高峰 {y}W{w}（{p}%）",
     fc_peaks: "往季主高峰：{list}",
     low_conf: "历史序列短，置信度低",
-    season_h2: "各<span class=\"term\" data-term=\"fluSeason\">流感季</span>占比对比",
-    season_note: "流感季自每年第 27 周起算（冬峰落在同一季内）。灰色细线为往季，彩色粗线为本季，可直观看出本季走势偏早还是偏晚。",
-    season_lbl: "{sy}–{yy} 季",
-    season_cur: "（本季）",
+    env_h2: "本季走势 vs <span class=\"term\" data-term=\"fluSeason\">历年同期</span>",
+    env_note: "横轴是本流感季的周次（自每年第 27 周起算，冬峰落在同一季内）。灰带＝历年同期的最高–最低范围，灰线＝历年同期中位数；彩色实线＝本季，虚线与浅色带＝未来 4 周预测及其 80% 区间。悬浮可看每周具体数值与历史区间。",
+    hist_median: "历年同期（中位）",
+    this_season: "本季",
+    raw_show: "查看完整历史原始走势（每周数值，2019 年至今）",
     south: "南方", north: "北方", national: "全国",
     south_p: "南方省份", north_p: "北方省份",
     path_h2: "本周病原体<span class=\"term\" data-term=\"positivity\">检测阳性率</span>",
@@ -141,10 +142,11 @@ const I18N = {
     fc_peak_item: "{season} peak {y}W{w} ({p}%)",
     fc_peaks: "Past season peaks: {list}",
     low_conf: "Short history — low confidence",
-    season_h2: "Share by <span class=\"term\" data-term=\"fluSeason\">flu season</span>",
-    season_note: "Each flu season starts at week 27, so the winter peak stays within one season. Thin gray lines: past seasons; thick colored line: current season.",
-    season_lbl: "{sy}–{yy}",
-    season_cur: " (current)",
+    env_h2: "This season vs <span class=\"term\" data-term=\"fluSeason\">previous seasons</span>",
+    env_note: "The x-axis runs through the current flu season (starting at week 27, so the winter peak stays inside one season). Gray band = highest–lowest range across previous seasons at the same week; gray line = their median; colored solid line = this season; dashed line and shaded area = 4-week forecast with its 80% interval. Hover for weekly values and the historical range.",
+    hist_median: "Previous seasons (median)",
+    this_season: "This season",
+    raw_show: "Show the full raw history (weekly values, 2019 onwards)",
     south: "South", north: "North", national: "National",
     south_p: "South", north_p: "North",
     path_h2: "Pathogen <span class=\"term\" data-term=\"positivity\">test positivity</span> this week",
@@ -352,7 +354,13 @@ function lineChart(container, series, opts) {
       let html = `<b>${opts.xLabel(best)}</b>`;
       for (const s of series) {
         const p = s.points.find(q => q.x === best);
-        if (p) html += `<br><span style="color:${s.color}">■</span> ${s.name || ""}${s.dash ? t("forecast_tag") : ""} ${p.y}%`;
+        if (!p) continue;
+        let line = `<br><span style="color:${s.color}">■</span> ${s.name || ""}${s.dash ? t("forecast_tag") : ""} ${p.y}%`;
+        if (s.bandTip && s.band) {
+          const lo = s.band.lo.find(q => q.x === best), hi = s.band.hi.find(q => q.x === best);
+          if (lo && hi) line += `（${lo.y}–${hi.y}%）`;
+        }
+        html += line;
       }
       showTip(e.pageX, e.pageY, html);
     });
@@ -493,35 +501,11 @@ function renderIli(tr, f) {
   $("ili-legend").innerHTML = legend.join("");
 }
 
-function renderForecast(f, tr) {
+function renderForecast(f) {
   const names = { south: t("south_p"), north: t("north_p"), national: t("national") };
   const colors = { south: "var(--south)", north: "var(--north)", national: "var(--national)" };
   $("forecast-section").style.display = "";
   $("forecast-range").textContent = f.generated ? tf("fc_range", { d: f.generated }) : "";
-
-  const series = [], legend = [];
-  for (const key of ["south", "north", "national"]) {
-    const r = f.regions[key];
-    const obs = ((tr && tr.ili[key]) || []).map(p => ({ x: fx(p), y: p.pct }));
-    if (!r || !r.points.length || !obs.length) continue;
-    const recent = obs.slice(-26);
-    const anchor = [obs[obs.length - 1]];
-    series.push({ points: recent, color: colors[key], name: names[key] });
-    series.push({
-      points: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.pct }))),
-      color: colors[key], dash: true, name: names[key],
-      band: {
-        hi: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.hi }))),
-        lo: anchor.concat(r.points.map(p => ({ x: fx(p), y: p.lo }))),
-      },
-    });
-    legend.push(`<span style="color:${colors[key]}">${names[key]}</span>`);
-  }
-  $("forecast-chart").innerHTML = "";
-  lineChart($("forecast-chart"), series, { xLabel: wxLabel });
-  if (legend.length)
-    legend.push(`<span class="dash-note">${tf("fc_dash_note", { h: f.horizon })}</span>`);
-  $("forecast-legend").innerHTML = legend.join("");
 
   const html = [];
   for (const key of ["south", "north", "national"]) {
@@ -602,29 +586,68 @@ function renderBacktest(f, tr, scope) {
   });
 }
 
-/* 各流感季 ILI% 对比：流感季自当年 W27 起算（冬峰落在同一季内） */
-function renderSeasons(tr, scope) {
+/* 本季 vs 历年同期：灰带＝历年同期最高–最低，灰线＝中位，彩色线＝本季 + 未来 4 周预测 */
+const seasonWeek = (year, week, sy) => Math.round((isoDate(year, week) - isoDate(sy, 27)) / 6048e5);
+
+function renderSeasons(tr, scope, f) {
   const pts = tr.ili[scope] || [];
   const seasons = new Map();
   for (const p of pts) {
     const sy = p.week >= 27 ? p.year : p.year - 1;
-    const sw = Math.round((isoDate(p.year, p.week) - isoDate(sy, 27)) / 6048e5);
+    const sw = seasonWeek(p.year, p.week, sy);
     if (sw < 0 || sw > 53) continue;
     if (!seasons.has(sy)) seasons.set(sy, []);
     seasons.get(sy).push({ x: sw, y: p.pct });
   }
   const keys = [...seasons.keys()].filter(k => seasons.get(k).length >= 8).sort((a, b) => a - b);
+  if (!keys.length) return;
   const cur = keys[keys.length - 1];
-  const vivid = { south: "var(--south)", north: "var(--north)", national: "var(--national)" }[scope];
-  const grays = { 1: "#6b7280", 2: "#9ca3af", 3: "#d1d5db" };
-  const series = [], legend = [];
-  for (const sy of keys) {
-    const isCur = sy === cur;
-    const color = isCur ? vivid : (grays[cur - sy] || "#e5e7eb");
-    const label = tf("season_lbl", { sy, yy: String(sy + 1).slice(2) });
-    series.push({ points: seasons.get(sy), color, name: label, thin: !isCur });
-    legend.push(`<span style="color:${color}">${label}${isCur ? t("season_cur") : ""}</span>`);
+  const past = keys.filter(k => k !== cur);
+
+  const byWeek = new Map();
+  for (const k of past)
+    for (const p of seasons.get(k)) {
+      if (!byWeek.has(p.x)) byWeek.set(p.x, []);
+      byWeek.get(p.x).push(p.y);
+    }
+  const med = [], hi = [], lo = [];
+  for (const sw of [...byWeek.keys()].sort((a, b) => a - b)) {
+    const v = byWeek.get(sw).slice().sort((a, b) => a - b);
+    const m = v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
+    med.push({ x: sw, y: Math.round(m * 10) / 10 });
+    lo.push({ x: sw, y: v[0] });
+    hi.push({ x: sw, y: v[v.length - 1] });
   }
+
+  const vivid = { south: "var(--south)", north: "var(--north)", national: "var(--national)" }[scope];
+  const curPts = seasons.get(cur).slice().sort((a, b) => a.x - b.x).map(p => ({ x: p.x, y: p.y }));
+  const series = [], legend = [];
+  series.push({ points: med, color: "#9ca3af", thin: true, name: t("hist_median"),
+                band: { lo, hi }, bandTip: true });
+  legend.push(`<span style="color:#9ca3af">${t("hist_median")}</span>`);
+  series.push({ points: curPts, color: vivid, name: t("this_season") });
+  legend.push(`<span style="color:${vivid}">${t("this_season")}</span>`);
+
+  const fr = f && f.regions && f.regions[scope];
+  if (fr && fr.points.length && curPts.length) {
+    const anchor = [curPts[curPts.length - 1]];
+    const fc = [];
+    for (const p of fr.points) {
+      const x = seasonWeek(p.year, p.week, cur);
+      if (x < 0 || x > 60) continue;
+      fc.push({ x, y: p.pct, lo: p.lo, hi: p.hi });
+    }
+    if (fc.length) {
+      series.push({
+        points: anchor.concat(fc.map(p => ({ x: p.x, y: p.y }))),
+        color: vivid, dash: true, name: t("this_season"),
+        band: { hi: anchor.map(p => ({ x: p.x, y: p.y })).concat(fc.map(p => ({ x: p.x, y: p.hi }))),
+                lo: anchor.map(p => ({ x: p.x, y: p.y })).concat(fc.map(p => ({ x: p.x, y: p.lo }))) },
+      });
+      legend.push(`<span class="dash-note">${tf("fc_dash_note", { h: f.horizon })}</span>`);
+    }
+  }
+
   $("season-chart").innerHTML = "";
   lineChart($("season-chart"), series, {
     xLabel: (x) => { let w = x + 27; if (w > 52) w -= 52; return "W" + w; }
@@ -751,11 +774,11 @@ function renderAll() {
   $("kpi-note").innerHTML = t("kpi_note");
   if (TRENDS) {
     renderIli(TRENDS, FORECAST);
-    renderSeasons(TRENDS, seasonScope);
+    renderSeasons(TRENDS, seasonScope, FORECAST);
     renderHeatmap(TRENDS, heatScene);
   }
   if (FORECAST) {
-    renderForecast(FORECAST, TRENDS);
+    renderForecast(FORECAST);
     renderBacktest(FORECAST, TRENDS, backtestScope);
   }
   renderPathogens(LATEST);
@@ -781,7 +804,7 @@ async function main() {
     const b = e.target.closest("button");
     if (b) setLang(b.dataset.l);
   });
-  for (const [id, fn] of [["season-scope", (k) => { seasonScope = k; renderSeasons(TRENDS, k); }],
+  for (const [id, fn] of [["season-scope", (k) => { seasonScope = k; renderSeasons(TRENDS, k, FORECAST); }],
                           ["heatmap-scene", (k) => { heatScene = k; renderHeatmap(TRENDS, k); }],
                           ["backtest-scope", (k) => { backtestScope = k; renderBacktest(FORECAST, TRENDS, k); }]]) {
     const el = $(id);

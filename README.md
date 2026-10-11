@@ -9,7 +9,7 @@
   - [上海市卫健委 · 传染病疫情报告](https://wsjkw.sh.gov.cn/yqxx/index.html)（每月，含流感病例数，城市级）
   - [天津市疾控局 · 工作动态](https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/)（每月，流感病例数在月报附件的分病种统计表 DOCX 里，城市级）
 - 更新机制：GitHub Actions 每周五凌晨（北京时间）运行 `fetch.py`，周六上午补抓一次（应对迟发），抓取数据并提交 `data/` 到仓库（见 `.github/workflows/update.yml`，也可在 Actions 页面手动触发）
-- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；含预测回测诊断图、各流感季对比视图与病原体阳性率周度热力图）；界面中英双语，语言选择记入 localStorage
+- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；主图为「本季 vs 历年同期」包络图——灰带＝历年同期最高–最低、灰线＝中位，彩色线为本季 + 4 周预测；完整历史原始走势收在折叠区；另有预测回测诊断图与病原体阳性率周度热力图）；界面中英双语，语言选择记入 localStorage
 
 ## 本地开发
 
@@ -124,7 +124,7 @@ A static site aggregating China's official weekly respiratory-disease surveillan
 
 - **ILI% trend** — influenza-like illness share of outpatient visits (South / North from the National Influenza Center weekly report; National from China CDC sentinel surveillance), with a 5-year history that accumulates weekly
 - **ILI% short-term forecast** — 4-week point estimates with 80% intervals, plus past-season peak statistics
-- **ILI% by flu season** — seasons aligned from week 27 so the winter peak stays in one season; current season highlighted
+- **This season vs previous seasons** — seasons aligned from week 27 (so the winter peak stays inside one season); a gray band shows the highest–lowest range across previous seasons at the same week, a gray line their median, and the colored line is this season plus its 4-week forecast (the full raw weekly history sits behind a collapsible section)
 - **Pathogen test positivity** — 11 respiratory pathogens from sentinel hospitals, outpatient ILI and inpatient SARI
 - **Weekly pathogen positivity heatmap** — the same data as a weekly heatmap (88+ weeks × 11 pathogens)
 - **Key cities** — Chongqing (weekly), Shanghai and Tianjin (monthly notifiable-disease reports, including influenza case counts)

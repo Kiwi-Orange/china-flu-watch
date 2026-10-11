@@ -122,6 +122,10 @@ main { max-width: 960px; margin: 0 auto; padding: 8px 16px 40px; }
 .seg button { border: none; background: transparent; padding: 4px 12px; font-size: 0.78rem; border-radius: 6px; cursor: pointer; color: var(--muted); }
 .seg button.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
 .seg.lang { position: absolute; top: 16px; right: 16px; margin: 0; }
+details.raw { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+details.raw summary { cursor: pointer; font-size: 0.8rem; color: var(--muted); }
+details.raw summary:hover { color: var(--ink); }
+details.raw[open] summary { margin-bottom: 8px; }
 @media (max-width: 640px) {
   .seg.lang { top: 8px; right: 8px; }
 }
