@@ -8,7 +8,7 @@
   - [重庆疾控 · 急性呼吸道传染病哨点监测](https://www.cqcdc.org/index.php?a=lists&catid=209)（每周，城市级）
   - [上海市卫健委 · 传染病疫情报告](https://wsjkw.sh.gov.cn/yqxx/index.html)（每月，含流感病例数，城市级）
 - 更新机制：GitHub Actions 每周五凌晨（北京时间）运行 `fetch.py`，周六上午补抓一次（应对迟发），抓取数据并提交 `data/` 到仓库（见 `.github/workflows/update.yml`，也可在 Actions 页面手动触发）
-- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；含各流感季对比视图与病原体阳性率周度热力图）；界面中英双语，语言选择记入 localStorage
+- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；含预测回测诊断图、各流感季对比视图与病原体阳性率周度热力图）；界面中英双语，语言选择记入 localStorage
 
 ## 本地开发
 
@@ -32,15 +32,33 @@ python3 -m http.server 8000    # 本地预览
 - `fetch_cities.py`：城市级源（重庆周更、上海月更）
 - `predict.py`：ILI% 短期预测（纯标准库统计外推，失败不阻断主流程）
 
-## ILI% 短期预测（forecast.json）
+## ILI% 短期预测与回测（forecast.json）
 
-方法（透明可复现的统计外推，非流行病动力学模型）：
+**候选模型族**（共 13 个，全部只用"当期为止"的历史拟合）：
 
-- 季节基线：历史同一 ISO 周的指数加权平均（年份权重半衰期 1 年），±2 周循环平滑
-- 异常回归：最近 4 周观测相对基线的偏差按 0.65^h 随预见期衰减（向季节均值回归）
-- 置信带：历史残差标准差随预见期放大，取 80% 区间（±1.28σ）
-- 历史少于 30 周的序列不预测；少于 90 周或不足 2 个完整季节的序列标记 `low_confidence`（目前仅"全国"序列，自 2025W24 起累积）
-- 季节高峰统计按"流感季"（当年 W27 至次年 W26，冬峰落在同一季内）取各季峰值周与峰值
+| 族 | 说明 |
+|---|---|
+| `clim` | 季节基线（同周指数加权均值 + 循环平滑）+ 异常按固定 0.65^h 衰减——第一版方法，留作对照 |
+| `harmK` | 截距 + K 阶傅里叶谐波（年周期），纯季节拟合 |
+| `arK` | 谐波 + 近期水平（最近一周值、最近 4 周均值）的直接多步回归 |
+| `fullK` | `arK` + 去年同期值（目标周前 52 周） |
+| `decK` | 分解式：谐波基线 + 异常自回归，持续性 ρ 由残差估计，异常取近期残差几何加权 |
+| `decc` | 同上但基线用同周加权均值，用于单独检验"估计 ρ"相对固定 0.65 的收益 |
+
+拟合用岭回归（正规方程增量累积 + 高斯消元，纯标准库，无第三方依赖），λ 固定 1。
+
+**为什么是等权组合而不是挑最优模型**：逐预见期挑选单个最优模型在回测里并不比等权组合更好，而且挑选会用"将来的误差"决定"过去的模型"，报出的精度偏乐观。等权组合是先验规则，不做任何挑选，因此回测误差就是这套流程当时真实会交付的精度。
+
+**走窗回测**：逐起点推进，每个起点只用 ≤t 的数据出预测，再与实际值比较。预测区间取组合误差的经验分位数，前 50% 起点标定 q10/q90，后 50% 作为留出期评估 80% 命中率（标定样本 <30 时改用按 √h 缩放的合并分位数）。
+
+2026-10 回测结果（每期组合全部 13 个模型，起点数：南方 250 / 北方 241）：
+
+| 区域 | 1 步 MAE（旧法 → 现流程） | 4 步 MAE | 80% 命中率（1/4 步，留出期） |
+|---|---|---|---|
+| 南方 | 0.94 → **0.77**（-18%） | 1.54 → **1.32** | 74% / 67% |
+| 北方 | 0.65 → **0.53**（-18%） | 1.13 → **0.97** | 73% / 71% |
+
+区间略偏窄（名义 80%、实测 67–76%），原因是留出期包含冬季大峰、误差大于标定前半段；页面上如实展示实测命中率，不做粉饰。
 
 预测结果随每周抓取自动重算。ILI% 受气候、流行毒株、假期就诊行为等影响，短期外推无法预判突发波动，仅供参考。
 
@@ -143,17 +161,24 @@ python3 -m http.server 8000    # preview at http://localhost:8000
 - `predict.py` — ILI% short-term forecast (pure-stdlib statistical extrapolation; failure never blocks the main pipeline)
 - `backfill_cnic.py` / `backfill_sentinel.py` — one-off history backfill scripts (safe to re-run)
 
-## Forecast method (`data/forecast.json`)
+## Forecast & backtest (`data/forecast.json`)
 
-Transparent statistical extrapolation, not an epidemiological model:
+**13 candidate models**, each fit only on data available at the time: a seasonal baseline with fixed anomaly decay (`clim`, the first version — kept as reference), Fourier-harmonic ridge regressions (`harmK`), harmonic + recent-level direct regressions (`arK`), the same plus last-year's same week (`fullK`), and decomposition models — harmonic baseline plus an AR anomaly whose persistence ρ is estimated from the data (`decK` / `decc`). All fitting is ridge regression solved by incremental normal equations and Gaussian elimination — pure standard library, no third-party dependencies.
 
-- **Seasonal baseline** — exponentially weighted average of the same ISO week across years (half-life 1 year), smoothed ±2 weeks
-- **Anomaly decay** — the deviation of the last 4 weeks from baseline decays as 0.65^h into the forecast horizon
-- **Interval** — historical residual spread widened with horizon, 80% band (±1.28σ)
-- Series with fewer than 30 weeks are not forecast; fewer than 90 weeks or fewer than 2 complete seasons are flagged `low_confidence` (currently only the national series, which starts at 2025W24)
-- Season peaks are computed per "flu season" (week 27 of a year through week 26 of the next)
+**Why an equal-weight combination instead of picking the best model**: per-horizon model picking did not beat equal-weight combination in the backtest, and picking uses future errors to choose past models, which flatters the reported accuracy. Equal weighting is an a priori rule, so the walk-forward errors are exactly what this pipeline would have delivered at the time.
 
-ILI% is driven by climate, circulating strains and holiday care-seeking behaviour; short-term extrapolation cannot anticipate sudden shifts. Use for reference only.
+**Walk-forward backtest**: at every origin the pipeline predicts using only data available then; intervals come from empirical quantiles of the combined errors (calibrated on the first half of origins, hit rate measured on the holdout half).
+
+October 2026 backtest (all 13 models combined; 250 origins for South, 241 for North):
+
+| Region | 1-step MAE (v1 → now) | 4-step MAE | 80% interval hit rate (1/4-step, holdout) |
+|---|---|---|---|
+| South | 0.94 → **0.77** (−18%) | 1.54 → **1.32** | 74% / 67% |
+| North | 0.65 → **0.53** (−18%) | 1.13 → **0.97** | 73% / 71% |
+
+Intervals run a little narrow (nominal 80%, measured 67–76%) because the holdout window contains a winter peak with larger errors than the calibration half; the site reports the measured hit rate as-is.
+
+Series with fewer than 30 weeks are not forecast; fewer than 90 weeks or fewer than 2 complete seasons are flagged `low_confidence` (currently only the national series, which starts at 2025W24). Season peaks are computed per flu season (week 27 through week 26 of the next year).
 
 ## Data archive (`data/archive/`)
 

@@ -77,6 +77,11 @@ main { max-width: 960px; margin: 0 auto; padding: 8px 16px 40px; }
 .fc-val { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .fc-range { font-size: 0.66rem; color: var(--muted); }
 .legend span.dash-note::before { content: ""; }
+.bt-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin: 12px 0 6px; }
+.bt-table th, .bt-table td { border-bottom: 1px solid var(--line); padding: 5px 6px; text-align: right; }
+.bt-table th:first-child, .bt-table td:first-child { text-align: left; }
+.bt-table th { color: var(--muted); font-weight: 600; }
+.bt-table td { font-variant-numeric: tabular-nums; }
 .chart-tip {
   position: absolute;
   display: none;

@@ -22,7 +22,30 @@ const I18N = {
     trend_note: "哨点医院流感样病例占门急诊就诊总数比例。数据源：国家流感中心流感监测周报（南/北方）、中疾控哨点监测周报（全国）。历史数据随周报滚动累积，悬浮可逐周读数。",
     fc_h2: "ILI% 短期预测",
     fc_range: "（生成于 {d}）",
-    fc_note: "方法：季节基线（历史同周加权平均）+ 近期偏差衰减回归，给出未来 4 周点估计与 80% 区间。纯统计外推，不构成医疗建议。",
+    fc_note: "方法：把 13 个统计模型（季节基线、傅里叶谐波回归、谐波基线+异常自回归等）等权组合，每期只用到当期为止的数据；区间由走窗回测残差标定。纯统计外推，不构成医疗建议。详见下方回测。",
+    bt_h2: "预测回测（模型表现）",
+    bt_note: "用走窗回测检验整套流程：每个起点只用当时可得的数据出预测，再与实际值比较——因此下面的误差就是这套流程当时会交付的精度。区间宽度在前半段标定，命中率在后半段（留出期）统计。虚线为逐周的 1 步预测，阴影为其 80% 区间。",
+    bt_mae1: "1 步平均绝对误差",
+    bt_mae4: "4 步平均绝对误差",
+    bt_cov1: "80% 区间命中率（1 步）",
+    bt_models: "每期组合模型数",
+    bt_pts: "回测起点（1 步）",
+    bt_obs: "实际",
+    bt_pred: "1 步预测",
+    bt_band: "80% 区间",
+    bt_h: "预见期",
+    bt_mae: "MAE",
+    bt_rmse: "RMSE",
+    bt_cov: "命中率",
+    bt_hold: "留出样本",
+    bt_base: "旧法 MAE",
+    bt_cmp: "对照第一版方法（季节基线 + 固定 0.65 衰减）：1 步 MAE {b1} → {n1}（{d1}），4 步 {b4} → {n4}（{d4}）。",
+    bt_improve: "降低 {p}%",
+    bt_worse: "升高 {p}%",
+    bt_same: "持平",
+    bt_scope: "回测区间：{from} 起至 {to}，共 {n} 个起点。",
+    inp: "个百分点",
+    unit_pct: "%",
     fc_vs_up: "当前 {c}%，高于历史同期基线 {b}%",
     fc_vs_down: "当前 {c}%，低于历史同期基线 {b}%",
     fc_peak_item: "{season} 季高峰 {y}W{w}（{p}%）",
@@ -81,7 +104,30 @@ const I18N = {
     trend_note: "Share of outpatient visits that are influenza-like illness (ILI) at sentinel hospitals. Sources: National Influenza Center weekly reports (South/North); China CDC sentinel surveillance (National). History accumulates weekly — hover to read values.",
     fc_h2: "ILI% Short-term Forecast",
     fc_range: "(generated {d})",
-    fc_note: "Method: seasonal baseline (weighted historical same-week average) + decaying recent-anomaly regression. 4-week point estimates with 80% intervals. Pure statistical extrapolation — not medical advice.",
+    fc_note: "Method: equal-weight combination of 13 statistical models (seasonal baseline, Fourier-harmonic ridge, harmonic-baseline + AR-anomaly, …), each fit only on data available at the time; intervals calibrated from walk-forward residuals. Pure statistical extrapolation — not medical advice. See the backtest below.",
+    bt_h2: "Forecast Backtest (Model Performance)",
+    bt_note: "The whole pipeline is checked by walk-forward backtest: at every origin it predicts using only data available then, and the result is compared with what actually happened — so the errors below are what this pipeline would have delivered at the time. Interval widths are calibrated on the first half; hit rates are measured on the holdout half. The dashed line is the weekly 1-step forecast; the band is its 80% interval.",
+    bt_mae1: "1-step mean abs. error",
+    bt_mae4: "4-step mean abs. error",
+    bt_cov1: "80% interval hit rate (1-step)",
+    bt_models: "Models combined per step",
+    bt_pts: "Backtest origins (1-step)",
+    bt_obs: "Actual",
+    bt_pred: "1-step forecast",
+    bt_band: "80% interval",
+    bt_h: "Horizon",
+    bt_mae: "MAE",
+    bt_rmse: "RMSE",
+    bt_cov: "Hit rate",
+    bt_hold: "Holdout n",
+    bt_base: "Baseline MAE",
+    bt_cmp: "Versus the first version (seasonal baseline + fixed 0.65 decay): 1-step MAE {b1} → {n1} ({d1}), 4-step {b4} → {n4} ({d4}).",
+    bt_improve: "{p}% lower",
+    bt_worse: "{p}% higher",
+    bt_same: "unchanged",
+    bt_scope: "Backtest window: {from} to {to}, {n} origins.",
+    inp: "pct points",
+    unit_pct: "%",
     fc_vs_up: "Currently {c}%, above the historical baseline of {b}%",
     fc_vs_down: "Currently {c}%, below the historical baseline of {b}%",
     fc_peak_item: "{season} peak {y}W{w} ({p}%)",
@@ -409,6 +455,67 @@ function renderForecast(f, tr) {
   $("forecast-cards").innerHTML = html.join("");
 }
 
+/* 预测回测：实际值 vs 逐周 1 步预测 + 分预见期精度表 */
+function renderBacktest(f, tr, scope) {
+  const sec = $("backtest-section");
+  const r = f && f.regions && f.regions[scope];
+  if (!r || !r.backtest) { sec.style.display = "none"; return; }
+  sec.style.display = "";
+  const bt = r.backtest;
+  const m1 = bt.by_horizon.find(m => m.h === 1) || {};
+  const m4 = bt.by_horizon.find(m => m.h === 4) || {};
+  const bm = bt.baseline_mae_by_horizon || [];
+  const pctDiff = (b, n) => (b && n != null) ? Math.round(Math.abs(b - n) / b * 100) : null;
+  const compare = (b, n) => {
+    const d = pctDiff(b, n);
+    if (d == null) return "—";
+    return n <= b ? tf("bt_improve", { p: d }) : tf("bt_worse", { p: d });
+  };
+
+  $("backtest-kpis").innerHTML = [
+    { label: t("bt_mae1"), value: m1.mae + " " + t("inp"), sub: `RMSE ${m1.rmse} · ${t("bt_pts")} ${m1.n}` },
+    { label: t("bt_mae4"), value: m4.mae + " " + t("inp"), sub: `RMSE ${m4.rmse} · n ${m4.n}` },
+    { label: t("bt_cov1"), value: m1.coverage != null ? Math.round(m1.coverage * 100) + "%" : "—", sub: `${t("bt_hold")} ${m1.n_eval ?? "—"}` },
+    { label: t("bt_models"), value: m1.members ?? "—", sub: `h = 1…4` },
+  ].map(k => `<div class="kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="sub">${k.sub}</div></div>`).join("");
+
+  const all = bt.series || [];
+  const view = all.slice(-104);
+  const obs = [], pred = [], hi = [], lo = [];
+  for (const p of view) {
+    const x = p.year + (p.week - 1) / 52;
+    obs.push({ x, y: p.obs });
+    pred.push({ x, y: p.pred });
+    hi.push({ x, y: p.hi });
+    lo.push({ x, y: p.lo });
+  }
+  const color = { south: "var(--south)", north: "var(--north)", national: "var(--national)" }[scope];
+  $("backtest-chart").innerHTML = "";
+  lineChart($("backtest-chart"), [
+    { points: obs, color, name: t("bt_obs") },
+    { points: pred, color, name: t("bt_pred"), dash: true, band: { hi, lo } },
+  ], { xLabel: wxLabel });
+  $("backtest-legend").innerHTML =
+    `<span style="color:${color}">${t("bt_obs")}</span>` +
+    `<span style="color:${color}">${t("bt_pred")}</span>` +
+    `<span class="dash-note">${t("bt_band")}</span>`;
+
+  const rows = bt.by_horizon.map((m, i) => `<tr><td>${m.h}</td><td>${m.mae}</td><td>${m.rmse}</td>` +
+    `<td>${m.coverage != null ? Math.round(m.coverage * 100) + "%" : "—"}</td>` +
+    `<td>${m.n_eval ?? "—"}</td><td>${bm[i] ?? "—"}</td></tr>`).join("");
+  $("backtest-table").innerHTML =
+    `<thead><tr><th>${t("bt_h")}</th><th>${t("bt_mae")}</th><th>${t("bt_rmse")}</th>` +
+    `<th>${t("bt_cov")}</th><th>${t("bt_hold")}</th><th>${t("bt_base")}</th></tr></thead><tbody>${rows}</tbody>`;
+
+  const f0 = all[0], f1 = all[all.length - 1];
+  $("backtest-scope-note").textContent = f0
+    ? tf("bt_scope", { from: `${f0.year}W${f0.week}`, to: `${f1.year}W${f1.week}`, n: bt.n }) : "";
+  $("backtest-cmp").textContent = tf("bt_cmp", {
+    b1: bm[0], n1: m1.mae, d1: compare(bm[0], m1.mae),
+    b4: bm[3], n4: m4.mae, d4: compare(bm[3], m4.mae),
+  });
+}
+
 /* 各流感季 ILI% 对比：流感季自当年 W27 起算（冬峰落在同一季内） */
 function renderSeasons(tr, scope) {
   const pts = tr.ili[scope] || [];
@@ -523,7 +630,7 @@ function translateStatic() {
 }
 
 let LATEST = null, TRENDS = null, FORECAST = null;
-let seasonScope = "south", heatScene = "outpatient";
+let seasonScope = "south", heatScene = "outpatient", backtestScope = "south";
 
 function renderAll() {
   translateStatic();
@@ -536,7 +643,10 @@ function renderAll() {
     renderSeasons(TRENDS, seasonScope);
     renderHeatmap(TRENDS, heatScene);
   }
-  if (FORECAST) renderForecast(FORECAST, TRENDS);
+  if (FORECAST) {
+    renderForecast(FORECAST, TRENDS);
+    renderBacktest(FORECAST, TRENDS, backtestScope);
+  }
   renderPathogens(LATEST);
   renderCities(LATEST);
   renderAnalysis(LATEST);
@@ -561,7 +671,8 @@ async function main() {
     if (b) setLang(b.dataset.l);
   });
   for (const [id, fn] of [["season-scope", (k) => { seasonScope = k; renderSeasons(TRENDS, k); }],
-                          ["heatmap-scene", (k) => { heatScene = k; renderHeatmap(TRENDS, k); }]]) {
+                          ["heatmap-scene", (k) => { heatScene = k; renderHeatmap(TRENDS, k); }],
+                          ["backtest-scope", (k) => { backtestScope = k; renderBacktest(FORECAST, TRENDS, k); }]]) {
     const el = $(id);
     if (!el) continue;
     el.addEventListener("click", (e) => {

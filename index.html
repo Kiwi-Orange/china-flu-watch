@@ -34,6 +34,20 @@
     <div id="forecast-cards" class="forecast-grid"></div>
   </section>
 
+  <section class="card" id="backtest-section" style="display:none">
+    <h2 data-i18n="bt_h2">预测回测（模型表现）</h2>
+    <p class="note" data-i18n="bt_note">用走窗回测检验整套流程：每个起点只用当时可得的数据出预测，再与实际值比较——因此下面的误差就是这套流程当时会交付的精度。区间宽度在前半段标定，命中率在后半段（留出期）统计。虚线为逐周的 1 步预测，阴影为其 80% 区间。</p>
+    <div class="seg" id="backtest-scope">
+      <button data-k="south" data-i18n="south">南方</button><button data-k="north" data-i18n="north">北方</button><button data-k="national" data-i18n="national">全国</button>
+    </div>
+    <div id="backtest-kpis" class="kpi-grid small"></div>
+    <div id="backtest-chart" class="chart"></div>
+    <div class="legend" id="backtest-legend"></div>
+    <table id="backtest-table" class="bt-table"></table>
+    <p class="note" id="backtest-scope-note"></p>
+    <p class="note" id="backtest-cmp"></p>
+  </section>
+
   <section class="card">
     <h2 data-i18n="season_h2">各流感季 ILI% 对比</h2>
     <p class="note" data-i18n="season_note">流感季自每年第 27 周起算（冬峰落在同一季内）。灰色细线为往季，彩色粗线为本季，可直观看出本季走势偏早还是偏晚。</p>
