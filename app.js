@@ -10,33 +10,34 @@ const I18N = {
     updated: "数据更新：{ts}",
     stale_suffix: "（部分源抓取失败，含旧数据）",
     stale_badge: "沿用旧数据",
-    kpi_nat: "全国 ILI%（{y}年第{w}周）",
+    kpi_nat: "全国<span class=\"term\" data-term=\"ili\">流感样病例</span>占比（{yw}）",
     kpi_nat_sub: "南方 {s} / 北方 {n}",
-    kpi_south: "南方 ILI%",
-    kpi_north: "北方 ILI%",
+    kpi_south: "南方<span class=\"term\" data-term=\"ili\">流感样病例</span>占比",
+    kpi_north: "北方<span class=\"term\" data-term=\"ili\">流感样病例</span>占比",
     kpi_prev: "上周 {v}",
-    kpi_lab: "流感病毒检测阳性率",
+    kpi_lab: "流感病毒<span class=\"term\" data-term=\"positivity\">检测阳性率</span>",
     kpi_lab_sub: "检测 {n} 份（流感周报）",
     kpi_top: "门急诊首位病原体",
-    trend_h2: "流感样病例百分比（ILI%）趋势",
+    kpi_note: "<b>流感样病例</b>指发热（≥38℃）并伴咳嗽或咽痛、尚未确诊的病例；“占比”就是这类病例占门急诊就诊总人数的比例，用来衡量流感活跃程度，<b>不等于确诊流感的人数</b>。鼠标悬停带虚线的词可看解释。",
+    trend_h2: "流感样病例占比趋势（<span class=\"term\" data-term=\"ilipct\">ILI%</span>）",
     trend_note: "哨点医院流感样病例占门急诊就诊总数比例。数据源：国家流感中心流感监测周报（南/北方）、中疾控哨点监测周报（全国）。历史数据随周报滚动累积，悬浮可逐周读数。",
-    fc_h2: "ILI% 短期预测",
+    fc_h2: "流感样病例占比 · 短期预测",
     fc_range: "（生成于 {d}）",
     fc_note: "方法：把 13 个统计模型（季节基线、傅里叶谐波回归、谐波基线+异常自回归等）等权组合，每期只用到当期为止的数据；区间由走窗回测残差标定。纯统计外推，不构成医疗建议。详见下方回测。",
     bt_h2: "预测回测（模型表现）",
     bt_note: "用走窗回测检验整套流程：每个起点只用当时可得的数据出预测，再与实际值比较——因此下面的误差就是这套流程当时会交付的精度。区间宽度在前半段标定，命中率在后半段（留出期）统计。虚线为逐周的 1 步预测，阴影为其 80% 区间。",
-    bt_mae1: "1 步平均绝对误差",
-    bt_mae4: "4 步平均绝对误差",
-    bt_cov1: "80% 区间命中率（1 步）",
+    bt_mae1: "1 步<span class=\"term\" data-term=\"mae\">平均绝对误差</span>",
+    bt_mae4: "4 步<span class=\"term\" data-term=\"mae\">平均绝对误差</span>",
+    bt_cov1: "<span class=\"term\" data-term=\"coverage\">80% 区间命中率</span>（1 步）",
     bt_models: "每期组合模型数",
     bt_pts: "回测起点（1 步）",
     bt_obs: "实际",
     bt_pred: "1 步预测",
     bt_band: "80% 区间",
-    bt_h: "预见期",
-    bt_mae: "MAE",
+    bt_h: "<span class=\"term\" data-term=\"horizon\">预见期</span>",
+    bt_mae: "<span class=\"term\" data-term=\"mae\">MAE</span>",
     bt_rmse: "RMSE",
-    bt_cov: "命中率",
+    bt_cov: "<span class=\"term\" data-term=\"coverage\">命中率</span>",
     bt_hold: "留出样本",
     bt_base: "旧法 MAE",
     bt_cmp: "对照第一版方法（季节基线 + 固定 0.65 衰减）：1 步 MAE {b1} → {n1}（{d1}），4 步 {b4} → {n4}（{d4}）。",
@@ -51,16 +52,16 @@ const I18N = {
     fc_peak_item: "{season} 季高峰 {y}W{w}（{p}%）",
     fc_peaks: "往季主高峰：{list}",
     low_conf: "历史序列短，置信度低",
-    season_h2: "各流感季 ILI% 对比",
+    season_h2: "各<span class=\"term\" data-term=\"fluSeason\">流感季</span>占比对比",
     season_note: "流感季自每年第 27 周起算（冬峰落在同一季内）。灰色细线为往季，彩色粗线为本季，可直观看出本季走势偏早还是偏晚。",
     season_lbl: "{sy}–{yy} 季",
     season_cur: "（本季）",
     south: "南方", north: "北方", national: "全国",
     south_p: "南方省份", north_p: "北方省份",
-    path_h2: "本周病原体检测阳性率",
-    path_note: "全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊流感样病例（ILI）与住院严重急性呼吸道感染（SARI）分列。",
+    path_h2: "本周病原体<span class=\"term\" data-term=\"positivity\">检测阳性率</span>",
+    path_note: "全国哨点医院呼吸道样本核酸检测阳性率（%），门急诊<span class=\"term\" data-term=\"ili\">流感样病例</span>与住院<span class=\"term\" data-term=\"sari\">严重急性呼吸道感染</span>分列。",
     outp: "门急诊",
-    hm_h2: "病原体阳性率周度热力图",
+    hm_h2: "病原体<span class=\"term\" data-term=\"positivity\">阳性率</span>周度热力图",
     hm_note: "哨点周报各周核酸检测阳性率，颜色越红越高，灰色为无数据。悬浮可查看具体数值。",
     hm_out: "门急诊 ILI", hm_in: "住院 SARI",
     hm_tip: "阳性率 {v}%",
@@ -76,17 +77,19 @@ const I18N = {
     city_month_total: "全市法定传染病：{n} 例（死亡 {d}）",
     city_class_split: "乙类 {b} 例 · 丙类 {c} 例",
     city_top_c: "丙类发病数前三位：{list}",
-    city_sh_note: "口径：法定传染病报告发病数（丙类含流感）。",
+    city_sh_note: "口径：<span class=\"term\" data-term=\"notifiable\">法定传染病</span>报告发病数（丙类含流感）。",
     city_none: "城市数据暂不可用",
     ana_h2: "官方分析与健康提示",
     ana_s: "中疾控哨点监测周报 · 分析（{yw}）",
     ana_c: "国家流感中心 · 流感周报概要（截至{d}）",
     ana_orig: "",
+    glossary_h2: "术语说明",
+    glossary_note: "带虚线的词可悬停或点击查看解释；这里是全部术语。",
     chart_empty: "暂无足够历史数据，随每周抓取累积",
     fc_dash_note: "虚线：未来 {h} 周预测，阴影为 80% 区间",
     forecast_tag: "（预测）",
     join: "；",
-    footer_sources: '数据来源：<a href="https://www.chinacdc.cn/jksj/jksj04_14275/">中疾控 · 全国急性呼吸道传染病哨点监测情况</a>（每周）、<a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/">国家流感中心 · 中国流感监测周报</a>（每周）、<a href="https://www.cqcdc.org/index.php?a=lists&catid=209">重庆疾控</a>（每周）、<a href="https://wsjkw.sh.gov.cn/yqxx/index.html">上海市卫健委</a>（每月）。原始数据归各发布机构所有。',
+    footer_sources: '数据来源：<a href="https://www.chinacdc.cn/jksj/jksj04_14275/">中疾控 · 全国急性呼吸道传染病哨点监测情况</a>（每周）、<a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/">国家流感中心 · 中国流感监测周报</a>（每周）、<a href="https://www.cqcdc.org/index.php?a=lists&catid=209">重庆疾控</a>（每周）、<a href="https://wsjkw.sh.gov.cn/yqxx/index.html">上海市卫健委</a>（每月）、<a href="https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/">天津市疾控局</a>（每月）。原始数据归各发布机构所有。',
     footer_note: "本站为个人非营利信息展示项目，由 GitHub Actions 定时抓取公开网页生成；数据未经质控，如有出入以官方发布为准。",
   },
   en: {
@@ -96,30 +99,31 @@ const I18N = {
     updated: "Data updated: {ts}",
     stale_suffix: " (some sources failed; older data shown)",
     stale_badge: "older data",
-    kpi_nat: "National ILI% ({yw})",
+    kpi_nat: "National <span class=\"term\" data-term=\"ili\">ILI</span> share ({yw})",
     kpi_nat_sub: "South {s} / North {n}",
-    kpi_south: "South ILI%",
-    kpi_north: "North ILI%",
+    kpi_south: "South <span class=\"term\" data-term=\"ili\">ILI</span> share",
+    kpi_north: "North <span class=\"term\" data-term=\"ili\">ILI</span> share",
     kpi_prev: "Last week {v}",
-    kpi_lab: "Flu test positivity",
+    kpi_lab: "Flu <span class=\"term\" data-term=\"positivity\">test positivity</span>",
     kpi_lab_sub: "{n} samples (weekly flu report)",
     kpi_top: "Top outpatient pathogen",
-    trend_h2: "ILI% Trend",
+    kpi_note: "<b>Influenza-like illness (ILI)</b> means fever (≥38 °C) with cough or sore throat, without laboratory confirmation. The “share” is how many of all outpatient/emergency visits were ILI — a gauge of influenza activity, <b>not the number of confirmed influenza cases</b>. Hover the dotted terms for definitions.",
+    trend_h2: "Influenza-like illness share (<span class=\"term\" data-term=\"ilipct\">ILI%</span>) trend",
     trend_note: "Share of outpatient visits that are influenza-like illness (ILI) at sentinel hospitals. Sources: National Influenza Center weekly reports (South/North); China CDC sentinel surveillance (National). History accumulates weekly — hover to read values.",
-    fc_h2: "ILI% Short-term Forecast",
+    fc_h2: "Influenza-like illness share · short-term forecast",
     fc_range: "(generated {d})",
     fc_note: "Method: equal-weight combination of 13 statistical models (seasonal baseline, Fourier-harmonic ridge, harmonic-baseline + AR-anomaly, …), each fit only on data available at the time; intervals calibrated from walk-forward residuals. Pure statistical extrapolation — not medical advice. See the backtest below.",
     bt_h2: "Forecast Backtest (Model Performance)",
     bt_note: "The whole pipeline is checked by walk-forward backtest: at every origin it predicts using only data available then, and the result is compared with what actually happened — so the errors below are what this pipeline would have delivered at the time. Interval widths are calibrated on the first half; hit rates are measured on the holdout half. The dashed line is the weekly 1-step forecast; the band is its 80% interval.",
-    bt_mae1: "1-step mean abs. error",
-    bt_mae4: "4-step mean abs. error",
-    bt_cov1: "80% interval hit rate (1-step)",
+    bt_mae1: "1-step <span class=\"term\" data-term=\"mae\">mean abs. error</span>",
+    bt_mae4: "4-step <span class=\"term\" data-term=\"mae\">mean abs. error</span>",
+    bt_cov1: "<span class=\"term\" data-term=\"coverage\">80% interval hit rate</span> (1-step)",
     bt_models: "Models combined per step",
     bt_pts: "Backtest origins (1-step)",
     bt_obs: "Actual",
     bt_pred: "1-step forecast",
     bt_band: "80% interval",
-    bt_h: "Horizon",
+    bt_h: "<span class=\"term\" data-term=\"horizon\">Horizon</span>",
     bt_mae: "MAE",
     bt_rmse: "RMSE",
     bt_cov: "Hit rate",
@@ -137,16 +141,16 @@ const I18N = {
     fc_peak_item: "{season} peak {y}W{w} ({p}%)",
     fc_peaks: "Past season peaks: {list}",
     low_conf: "Short history — low confidence",
-    season_h2: "ILI% by Flu Season",
+    season_h2: "Share by <span class=\"term\" data-term=\"fluSeason\">flu season</span>",
     season_note: "Each flu season starts at week 27, so the winter peak stays within one season. Thin gray lines: past seasons; thick colored line: current season.",
     season_lbl: "{sy}–{yy}",
     season_cur: " (current)",
     south: "South", north: "North", national: "National",
     south_p: "South", north_p: "North",
-    path_h2: "Pathogen Test Positivity This Week",
-    path_note: "Nucleic-acid test positivity (%) at national sentinel hospitals; outpatient ILI and inpatient SARI shown separately.",
+    path_h2: "Pathogen <span class=\"term\" data-term=\"positivity\">test positivity</span> this week",
+    path_note: "Nucleic-acid test positivity (%) at national sentinel hospitals; outpatient <span class=\"term\" data-term=\"ili\">ILI</span> and inpatient <span class=\"term\" data-term=\"sari\">SARI</span> shown separately.",
     outp: "Outp.",
-    hm_h2: "Weekly Pathogen Positivity Heatmap",
+    hm_h2: "Weekly pathogen <span class=\"term\" data-term=\"positivity\">positivity</span> heatmap",
     hm_note: "Weekly nucleic-acid positivity from sentinel reports; darker red = higher, gray = no data. Hover for values.",
     hm_out: "Outpatient ILI", hm_in: "Inpatient SARI",
     hm_tip: "Positivity {v}%",
@@ -162,17 +166,19 @@ const I18N = {
     city_month_total: "All notifiable diseases: {n} cases ({d} deaths)",
     city_class_split: "Class B {b} · Class C {c}",
     city_top_c: "Top 3 Class C: {list}",
-    city_sh_note: "Basis: notifiable disease reports (Class C incl. influenza).",
+    city_sh_note: "Basis: <span class=\"term\" data-term=\"notifiable\">notifiable disease</span> reports (Class C incl. influenza).",
     city_none: "City data unavailable",
     ana_h2: "Official Analysis & Health Notes",
     ana_s: "China CDC Sentinel Weekly · Analysis ({yw})",
     ana_c: "National Influenza Center · Weekly Summary (as of {d})",
     ana_orig: " (official text, Chinese only)",
+    glossary_h2: "Glossary",
+    glossary_note: "Dotted terms show a definition on hover or tap; all of them are listed here.",
     chart_empty: "Not enough history yet — accumulates weekly",
     fc_dash_note: "Dashed: {h}-week forecast, shaded 80% interval",
     forecast_tag: " (forecast)",
     join: "; ",
-    footer_sources: 'Sources: <a href="https://www.chinacdc.cn/jksj/jksj04_14275/">China CDC · National Acute Respiratory Disease Sentinel Surveillance</a> (weekly), <a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/">National Influenza Center · China Weekly Influenza Report</a> (weekly), <a href="https://www.cqcdc.org/index.php?a=lists&catid=209">Chongqing CDC</a> (weekly), <a href="https://wsjkw.sh.gov.cn/yqxx/index.html">Shanghai Health Commission</a> (monthly). All source data belong to the original publishers.',
+    footer_sources: 'Sources: <a href="https://www.chinacdc.cn/jksj/jksj04_14275/">China CDC · National Acute Respiratory Disease Sentinel Surveillance</a> (weekly), <a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/">National Influenza Center · China Weekly Influenza Report</a> (weekly), <a href="https://www.cqcdc.org/index.php?a=lists&catid=209">Chongqing CDC</a> (weekly), <a href="https://wsjkw.sh.gov.cn/yqxx/index.html">Shanghai Health Commission</a> (monthly), <a href="https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/">Tianjin CDC Bureau</a> (monthly). All source data belong to the original publishers.',
     footer_note: "A personal non-profit project: data fetched on a schedule by GitHub Actions from public web pages, without quality control. Official releases prevail in case of discrepancies.",
   },
 };
@@ -213,11 +219,72 @@ function svgEl(tag, attrs) {
   return el;
 }
 
+/* ---------- 术语解释（悬停/点击 .term 显示） ---------- */const GLOSSARY = {
+  zh: {
+    ili: ["流感样病例（ILI）", "发热（体温 ≥38℃）并伴咳嗽或咽痛、尚未确诊的病例。哨点医院按这一标准上报，用来代表流感等呼吸道疾病的活跃程度。"],
+    ilipct: ["ILI%（流感样病例占比）", "流感样病例占门急诊就诊总人数的比例。例如 4% 表示每 100 个门急诊病人中约有 4 个是流感样病例。它衡量流感活跃程度，不等于确诊流感的人数。"],
+    sari: ["SARI（住院严重急性呼吸道感染）", "需要住院的严重呼吸道感染病例，病情比流感样病例更重。"],
+    positivity: ["检测阳性率", "送检的呼吸道样本中检出某种病原体的比例，反映该病原体实际的流行强度。"],
+    notifiable: ["法定传染病", "法律规定必须上报的传染病。流行性感冒属丙类；月报中的数字是“报告发病数”，与哨点监测口径不同，不可直接比较。"],
+    fluSeason: ["流感季", "本站指“当年第 27 周至次年第 26 周”——这样冬季高峰落在同一季内，便于逐年对比。"],
+    horizon: ["预见期", "预测提前的周数：1 步＝预测下一周，4 步＝预测四周以后。"],
+    coverage: ["区间命中率", "实际值落入预测区间的比例。80% 区间长期命中率接近 80%，才说明区间宽度合适。"],
+    mae: ["MAE（平均绝对误差）", "预测值与实际值之差绝对值的平均，单位为百分点。例如 0.7 表示平均偏差约 0.7 个百分点。"],
+  },
+  en: {
+    ili: ["Influenza-like illness (ILI)", "Fever (≥38 °C) with cough or sore throat, without laboratory confirmation. Sentinel hospitals report cases by this definition to gauge how active influenza and other respiratory infections are."],
+    ilipct: ["ILI%", "Share of outpatient/emergency visits that are influenza-like illness. 4% means roughly 4 of every 100 visits were ILI. It measures influenza activity, not the number of confirmed cases."],
+    sari: ["SARI", "Severe acute respiratory infection requiring hospitalisation — more severe than ILI."],
+    positivity: ["Test positivity", "Share of tested respiratory samples that are positive for a given pathogen; reflects how intensely it is circulating."],
+    notifiable: ["Notifiable disease", "A disease that must be reported by law. Influenza is Class C. Monthly figures are reported case counts — a different basis from sentinel surveillance, not directly comparable."],
+    fluSeason: ["Flu season", "In this project: week 27 of a year through week 26 of the next, so the winter peak stays inside one season and seasons can be compared."],
+    horizon: ["Horizon", "How far ahead the forecast goes: 1-step = next week, 4-step = four weeks ahead."],
+    coverage: ["Interval hit rate", "Share of actual values that fell inside the forecast interval. An 80% interval should hit about 80% of the time over the long run."],
+    mae: ["MAE (mean absolute error)", "Average absolute difference between forecast and actual, in percentage points. 0.7 means an average miss of about 0.7 p.p."],
+  },
+};
+
+let tipShownAt = 0;
+
+function showTermTip(el, x, y) {
+  const g = GLOSSARY[LANG][el.dataset.term] || GLOSSARY.zh[el.dataset.term];
+  if (!g) return;
+  showTip(x, y, `<b>${g[0]}</b><br>${g[1]}`, true);
+  if (tipEl) {
+    tipEl.dataset.term = el.dataset.term;
+    tipShownAt = Date.now();
+  }
+}
+
+document.addEventListener("mouseover", (e) => {
+  const el = e.target.closest && e.target.closest(".term");
+  if (el) showTermTip(el, e.pageX, e.pageY);
+});
+document.addEventListener("mouseout", (e) => {
+  if (e.target.closest && e.target.closest(".term")) hideTip();
+});
+document.addEventListener("click", (e) => {
+  const el = e.target.closest && e.target.closest(".term");
+  if (!el) return;
+  // 移动端点按会先触发 mouseover 再触发 click：同一次点按不重复处理
+  if (Date.now() - tipShownAt < 400 && tipEl && tipEl.dataset.term === el.dataset.term) return;
+  // 已显示同一术语时，点击收起并跳到术语表该条；否则显示释义
+  if (tipEl && tipEl.style.display === "block" && tipEl.dataset.term === el.dataset.term) {
+    hideTip();
+    const target = document.getElementById("glossary-" + el.dataset.term);
+    if (target) target.scrollIntoView({ block: "center" });
+  } else {
+    showTermTip(el, e.pageX, e.pageY);
+  }
+});
+
 /* ---------- 悬浮提示 ---------- */
 let tipEl = null;
-function showTip(x, y, html) {
+function showTip(x, y, html, wide) {
   if (!tipEl) { tipEl = document.createElement("div"); tipEl.className = "chart-tip"; document.body.appendChild(tipEl); }
   tipEl.innerHTML = html;
+  tipEl.classList.toggle("wide", !!wide);
+  if (!wide) tipEl.dataset.term = "";
   tipEl.style.display = "block";
   tipEl.style.left = Math.min(x + 12, window.innerWidth + window.scrollX - tipEl.offsetWidth - 8) + "px";
   tipEl.style.top = (y + 14) + "px";
@@ -654,6 +721,14 @@ function renderAnalysis(d) {
   $("analysis").innerHTML = html;
 }
 
+/* 术语表（底部）：GLOSSARY 全量列出，与悬停气泡同源 */
+function renderGlossary() {
+  const g = GLOSSARY[LANG] || GLOSSARY.zh;
+  $("glossary").innerHTML = Object.keys(g).map(k =>
+    `<div class="gl-item" id="glossary-${k}"><div class="gl-term">${g[k][0]}</div>` +
+    `<div class="gl-def">${g[k][1]}</div></div>`).join("");
+}
+
 /* ---------- 语言切换 ---------- */
 function translateStatic() {
   document.documentElement.lang = LANG === "en" ? "en" : "zh-CN";
@@ -668,10 +743,12 @@ let seasonScope = "south", heatScene = "outpatient", backtestScope = "south";
 
 function renderAll() {
   translateStatic();
+  renderGlossary();
   if (!LATEST) return;
   $("updated").textContent = tf("updated", { ts: LATEST.updated }) +
     ((LATEST.sentinel?.stale || LATEST.cnic?.stale) ? t("stale_suffix") : "");
   renderKpis(LATEST);
+  $("kpi-note").innerHTML = t("kpi_note");
   if (TRENDS) {
     renderIli(TRENDS, FORECAST);
     renderSeasons(TRENDS, seasonScope);
