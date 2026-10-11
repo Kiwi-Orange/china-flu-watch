@@ -47,10 +47,13 @@ const I18N = {
     bt_scope: "回测区间：{from} 起至 {to}，共 {n} 个起点。",
     inp: "个百分点",
     unit_pct: "%",
-    fc_vs_up: "当前 {c}%，高于历史同期基线 {b}%",
-    fc_vs_down: "当前 {c}%，低于历史同期基线 {b}%",
-    fc_peak_item: "{season} 季高峰 {y}W{w}（{p}%）",
-    fc_peaks: "往季主高峰：{list}",
+    fc_dir: "未来 4 周：{word}（{sign}{d} 个百分点）",
+    fc_flat: "基本持平",
+    fc_up: "小幅上升", fc_up_big: "明显上升",
+    fc_down: "小幅下降", fc_down_big: "明显下降",
+    fc_pos: "当前 {c}%，历年同期 {min}–{max}%（中位 {med}，{n} 年）",
+    fc_peak_stat: "历年主高峰：多在 {from}–{to}（中位 {med}），峰值中位 {p}%（{n} 个流感季）",
+    fc_week_note: "每格为接下来的一周（周一起算，悬浮看周次）；格内小字是该周的 80% 预测区间。",
     low_conf: "历史序列短，置信度低",
     env_h2: "本季走势 vs <span class=\"term\" data-term=\"fluSeason\">历年同期</span>",
     env_note: "横轴是本流感季的周次（自每年第 27 周起算，冬峰落在同一季内）。灰带＝历年同期的最高–最低范围，灰线＝历年同期中位数；彩色实线＝本季，虚线与浅色带＝未来 4 周预测及其 80% 区间。悬浮可看每周具体数值与历史区间。",
@@ -137,10 +140,13 @@ const I18N = {
     bt_scope: "Backtest window: {from} to {to}, {n} origins.",
     inp: "pct points",
     unit_pct: "%",
-    fc_vs_up: "Currently {c}%, above the historical baseline of {b}%",
-    fc_vs_down: "Currently {c}%, below the historical baseline of {b}%",
-    fc_peak_item: "{season} peak {y}W{w} ({p}%)",
-    fc_peaks: "Past season peaks: {list}",
+    fc_dir: "Next 4 weeks: {word} ({sign}{d} pct points)",
+    fc_flat: "roughly flat",
+    fc_up: "slight rise", fc_up_big: "clear rise",
+    fc_down: "slight fall", fc_down_big: "clear fall",
+    fc_pos: "Currently {c}%; same week in past seasons {min}–{max}% (median {med}, {n} seasons)",
+    fc_peak_stat: "Main peak in past seasons: usually {from}–{to} (median {med}), median peak {p}% ({n} seasons)",
+    fc_week_note: "each cell is the coming week (starting Monday; hover for the ISO week); the small range below is its 80% forecast interval.",
     low_conf: "Short history — low confidence",
     env_h2: "This season vs <span class=\"term\" data-term=\"fluSeason\">previous seasons</span>",
     env_note: "The x-axis runs through the current flu season (starting at week 27, so the winter peak stays inside one season). Gray band = highest–lowest range across previous seasons at the same week; gray line = their median; colored solid line = this season; dashed line and shaded area = 4-week forecast with its 80% interval. Hover for weekly values and the historical range.",
@@ -501,26 +507,111 @@ function renderIli(tr, f) {
   $("ili-legend").innerHTML = legend.join("");
 }
 
-function renderForecast(f) {
+/* 日期与统计辅助：周次→日期、历年同期分布、历年主高峰摘要 */
+const weekStart = (y, w) => isoDate(y, w);
+const fmtDate = (d) => LANG === "en"
+  ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
+  : `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
+const addDays = (d, n) => { const x = new Date(d.getTime()); x.setUTCDate(x.getUTCDate() + n); return x; };
+
+function seasonIndex(tr, scope) {
+  const m = new Map();
+  for (const p of ((tr && tr.ili[scope]) || [])) {
+    const sy = p.week >= 27 ? p.year : p.year - 1;
+    const sw = seasonWeek(p.year, p.week, sy);
+    if (sw < 0 || sw > 53) continue;
+    if (!m.has(sy)) m.set(sy, new Map());
+    m.get(sy).set(sw, p.pct);
+  }
+  return m;
+}
+
+const median = (v) => {
+  if (!v.length) return null;
+  const a = v.slice().sort((x, y) => x - y);
+  return a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2;
+};
+
+/* 当前值在历年同期的位置：范围与中位（比只跟均值比更有信息量） */
+function histSameWeek(tr, scope, curSy, sw0) {
+  const idx = seasonIndex(tr, scope);
+  const vals = [];
+  for (const [sy, m] of idx) {
+    if (sy === curSy) continue;
+    const v = m.get(sw0);
+    if (v !== undefined) vals.push(v);
+  }
+  if (vals.length < 2) return null;
+  return { min: Math.min(...vals), max: Math.max(...vals), med: Math.round(median(vals) * 10) / 10, n: vals.length };
+}
+
+/* 历年主高峰的统计摘要：把"哪一年哪一周"这种流水账换成中位时间/峰值 */
+function peakStats(seasons) {
+  const idxs = [], pcts = [];
+  for (const s of seasons || []) {
+    const sy = parseInt(String(s.season).slice(0, 4), 10);
+    const sw = seasonWeek(s.peak_year, s.peak_week, sy);
+    if (sw < 0 || sw > 53) continue;
+    idxs.push(sw);
+    pcts.push(s.peak_pct);
+  }
+  if (!idxs.length) return null;
+  return {
+    minIdx: Math.min(...idxs), maxIdx: Math.max(...idxs),
+    medIdx: Math.round(median(idxs)),
+    medPct: Math.round(median(pcts) * 10) / 10,
+    n: idxs.length,
+  };
+}
+
+function renderForecast(f, tr) {
   const names = { south: t("south_p"), north: t("north_p"), national: t("national") };
-  const colors = { south: "var(--south)", north: "var(--north)", national: "var(--national)" };
   $("forecast-section").style.display = "";
   $("forecast-range").textContent = f.generated ? tf("fc_range", { d: f.generated }) : "";
+  $("fc-week-note").textContent = t("fc_week_note");
 
   const html = [];
   for (const key of ["south", "north", "national"]) {
     const r = f.regions[key];
     if (!r) continue;
-    const seq = r.points.map(p =>
-      `<div class="fc-step"><div class="fc-week">${p.year}W${p.week}</div>` +
-      `<div class="fc-val">${p.pct}%</div><div class="fc-range">${p.lo}–${p.hi}</div></div>`).join("");
-    const vsHist = tf(r.current - r.baseline_now >= 0 ? "fc_vs_up" : "fc_vs_down", { c: r.current, b: r.baseline_now });
-    const seasons = (r.seasons || []).map(s =>
-      tf("fc_peak_item", { season: s.season, y: s.peak_year, w: s.peak_week, p: s.peak_pct })).join(t("join"));
+    const curSy = r.from.week >= 27 ? r.from.year : r.from.year - 1;
+    const sw0 = seasonWeek(r.from.year, r.from.week, curSy);
+
+    // 方向判断：以 4 周后的点估计与当前值之差为准
+    const last = r.points[r.points.length - 1];
+    const delta = last ? last.pct - r.current : 0;
+    const word = Math.abs(delta) < 0.15 ? t("fc_flat")
+      : delta > 0 ? (delta >= 0.5 ? t("fc_up_big") : t("fc_up"))
+      : (delta <= -0.5 ? t("fc_down_big") : t("fc_down"));
+    const dir = tf("fc_dir", { word, sign: delta >= 0 ? "+" : "−", d: Math.abs(delta).toFixed(1) });
+
+    // 历年同期位置
+    const h = histSameWeek(tr, key, curSy, sw0);
+    const pos = h ? tf("fc_pos", { c: r.current, min: h.min, max: h.max, med: h.med, n: h.n }) : "";
+
+    // 逐周（日期为主，周次放悬浮提示）
+    const seq = r.points.map(p => {
+      const d = weekStart(p.year, p.week);
+      return `<div class="fc-step" title="${fmtYW(p.year, p.week)} ${fmtDate(d)}–${fmtDate(addDays(d, 6))}">` +
+        `<div class="fc-week">${fmtDate(d)}</div>` +
+        `<div class="fc-val">${p.pct}%</div><div class="fc-range">${p.lo}–${p.hi}</div></div>`;
+    }).join("");
+
+    // 历年主高峰（统计摘要）
+    const pk = peakStats(r.seasons);
+    const base = isoDate(curSy, 27);
+    const peakLine = (pk && pk.n >= 2) ? tf("fc_peak_stat", {
+      from: fmtDate(addDays(base, pk.minIdx * 7)),
+      to: fmtDate(addDays(base, pk.maxIdx * 7)),
+      med: fmtDate(addDays(base, pk.medIdx * 7)),
+      p: pk.medPct, n: pk.n,
+    }) : "";
+
     html.push(`<div class="fc-card"><h3>${names[key]}${r.low_confidence ? `<span class="badge-stale">${t("low_conf")}</span>` : ""}</h3>
-      <div class="meta">${vsHist}</div>
+      <div class="fc-dir">${dir}</div>
+      ${pos ? `<div class="meta">${pos}</div>` : ""}
       <div class="fc-seq">${seq}</div>
-      ${seasons ? `<div class="meta">${tf("fc_peaks", { list: seasons })}</div>` : ""}</div>`);
+      ${peakLine ? `<div class="meta">${peakLine}</div>` : ""}</div>`);
   }
   $("forecast-cards").innerHTML = html.join("");
 }
@@ -778,7 +869,7 @@ function renderAll() {
     renderHeatmap(TRENDS, heatScene);
   }
   if (FORECAST) {
-    renderForecast(FORECAST);
+    renderForecast(FORECAST, TRENDS);
     renderBacktest(FORECAST, TRENDS, backtestScope);
   }
   renderPathogens(LATEST);
