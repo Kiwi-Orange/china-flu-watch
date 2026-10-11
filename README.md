@@ -1,6 +1,6 @@
 # 全国呼吸道传染病周报监测
 
-一个纯静态网站，聚合中国官方每周发布的呼吸道传染病监测数据：全国及南北方流感样病例（ILI%）水平、11 种呼吸道病原体检测阳性率、流感病毒型别构成、暴发疫情与重点城市动态，并基于多年历史序列给出 ILI% 未来 4 周统计预测。
+一个纯静态网站，聚合中国官方每周发布的呼吸道传染病监测数据：全国及南北方流感样病例（ILI%）水平、11 种呼吸道病原体检测阳性率与周度热力图、各流感季对比、重点城市动态，并基于多年历史序列给出 ILI% 未来 4 周统计预测。页面右上角可切换中英文（英文说明见文末 English 段）。
 
 - 数据来源（均为公开页面，免鉴权）：
   - [中国疾控中心 · 全国急性呼吸道传染病哨点监测情况](https://www.chinacdc.cn/jksj/jksj04_14275/)（每周，HTML 表格）
@@ -8,7 +8,7 @@
   - [重庆疾控 · 急性呼吸道传染病哨点监测](https://www.cqcdc.org/index.php?a=lists&catid=209)（每周，城市级）
   - [上海市卫健委 · 传染病疫情报告](https://wsjkw.sh.gov.cn/yqxx/index.html)（每月，含流感病例数，城市级）
 - 更新机制：GitHub Actions 每周五凌晨（北京时间）运行 `fetch.py`，周六上午补抓一次（应对迟发），抓取数据并提交 `data/` 到仓库（见 `.github/workflows/update.yml`，也可在 Actions 页面手动触发）
-- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；含各流感季对比视图与病原体阳性率周度热力图）
+- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；含各流感季对比视图与病原体阳性率周度热力图）；界面中英双语，语言选择记入 localStorage
 
 ## 本地开发
 
@@ -94,3 +94,69 @@ python3 backfill_sentinel.py            # 哨点监测周报，2024W46 起约 10
 本站为个人非营利信息展示项目，数据仅供参考，不构成医疗建议。原始数据归中国疾控中心、国家流感中心及各地方发布机构所有，如有出入以官方发布为准。
 
 This is a personal, non-profit project aggregating publicly released weekly respiratory-disease surveillance reports in China. Data are for reference only and do not constitute medical advice; all rights belong to the original publishers.
+
+---
+
+# English
+
+A static site aggregating China's official weekly respiratory-disease surveillance data, with a Chinese/English toggle in the page header (choice is remembered; `?lang=en` or `?lang=zh` forces a language).
+
+## What the site shows
+
+- **ILI% trend** — influenza-like illness share of outpatient visits (South / North from the National Influenza Center weekly report; National from China CDC sentinel surveillance), with a 5-year history that accumulates weekly
+- **ILI% short-term forecast** — 4-week point estimates with 80% intervals, plus past-season peak statistics
+- **ILI% by flu season** — seasons aligned from week 27 so the winter peak stays in one season; current season highlighted
+- **Pathogen test positivity** — 11 respiratory pathogens from sentinel hospitals, outpatient ILI and inpatient SARI
+- **Weekly pathogen positivity heatmap** — the same data as a weekly heatmap (88+ weeks × 11 pathogens)
+- **Key cities** — Chongqing (weekly) and Shanghai (monthly)
+- **Official analysis** — verbatim Chinese text from the source reports, marked as such in English mode
+
+All charts support hover readouts.
+
+## Data sources (public pages, no auth)
+
+- [China CDC · National acute respiratory disease sentinel surveillance](https://www.chinacdc.cn/jksj/jksj04_14275/) (weekly, HTML tables)
+- [National Influenza Center · China weekly influenza report](https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/) (weekly, HTML summary + PDF)
+- [Chongqing CDC](https://www.cqcdc.org/index.php?a=lists&catid=209) (weekly, city level)
+- [Shanghai Health Commission](https://wsjkw.sh.gov.cn/yqxx/index.html) (monthly, city level)
+
+## How it updates
+
+GitHub Actions runs `fetch.py` every Friday early morning (Beijing time) with a Saturday retry, commits the refreshed `data/` back to the repo, and GitHub Pages redeploys automatically (see `.github/workflows/update.yml`; can also be triggered manually from the Actions tab).
+
+## Local development
+
+```bash
+# Requires Python 3 standard library + system pdftotext
+# (macOS: brew install poppler; Debian/Ubuntu: apt install poppler-utils)
+python3 fetch.py               # fetch data → data/latest.json, trends.json, forecast.json, archive CSVs
+python3 -m http.server 8000    # preview at http://localhost:8000
+```
+
+## Code structure
+
+- `fetch.py` — orchestrator: schedules the fetchers, writes `data/latest.json` / `trends.json`, maintains `data/archive/`, calls `predict.py`
+- `fetch_common.py` — HTTP retry, HTML table parsing, pdftotext wrapper
+- `fetch_sentinel.py` — China CDC sentinel weekly report (national + South/North, 11 pathogens)
+- `fetch_cnic.py` — National Influenza Center weekly report PDF (ILI% incl. prior-year comparison, lab testing, outbreaks)
+- `fetch_cities.py` — city-level sources (Chongqing weekly, Shanghai monthly)
+- `predict.py` — ILI% short-term forecast (pure-stdlib statistical extrapolation; failure never blocks the main pipeline)
+- `backfill_cnic.py` / `backfill_sentinel.py` — one-off history backfill scripts (safe to re-run)
+
+## Forecast method (`data/forecast.json`)
+
+Transparent statistical extrapolation, not an epidemiological model:
+
+- **Seasonal baseline** — exponentially weighted average of the same ISO week across years (half-life 1 year), smoothed ±2 weeks
+- **Anomaly decay** — the deviation of the last 4 weeks from baseline decays as 0.65^h into the forecast horizon
+- **Interval** — historical residual spread widened with horizon, 80% band (±1.28σ)
+- Series with fewer than 30 weeks are not forecast; fewer than 90 weeks or fewer than 2 complete seasons are flagged `low_confidence` (currently only the national series, which starts at 2025W24)
+- Season peaks are computed per "flu season" (week 27 of a year through week 26 of the next)
+
+ILI% is driven by climate, circulating strains and holiday care-seeking behaviour; short-term extrapolation cannot anticipate sudden shifts. Use for reference only.
+
+## Data archive (`data/archive/`)
+
+Raw public data, all times Beijing time, no quality control: `ili-weekly.csv` (long-format ILI% with a `source` column: current / prev_week / comparison), `sentinel-pathogens.csv`, `lab-weekly.csv`, `outbreaks-weekly.csv`, `city-weekly-top.csv`, `city-monthly-cases.csv`. Column details are in the Chinese section above.
+
+Note: the national sentinel "ILI%" and the influenza-report "South/North ILI%" come from two different surveillance networks — small differences are expected. Shanghai's monthly "influenza" figure is a notifiable-disease case count (Class C) and is not comparable to sentinel positivity rates. The Shanghai source is only reachable from mainland China networks, so the GitHub Actions run keeps older data (marked stale); refresh it by running `python3 fetch.py` locally.
