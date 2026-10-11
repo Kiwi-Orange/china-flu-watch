@@ -1,6 +1,6 @@
 # 全国呼吸道传染病周报监测
 
-一个纯静态网站，聚合中国官方每周发布的呼吸道传染病监测数据：全国及南北方流感样病例（ILI%）水平、11 种呼吸道病原体检测阳性率（与去年同期对照）与周度热力图、各流感季对比、重点城市动态，并基于多年历史序列给出 ILI% 未来 4 周统计预测。页面右上角可切换中英文（英文说明见文末 English 段）。
+一个纯静态网站，聚合中国官方每周发布的呼吸道传染病监测数据：全国及南北方流感样病例（ILI%）水平、11 种呼吸道病原体检测阳性率（与去年同期对照）与近一年走势小图、各流感季对比、重点城市动态，并基于多年历史序列给出 ILI% 未来 4 周统计预测。页面右上角可切换中英文（英文说明见文末 English 段）。
 
 - 数据来源（均为公开页面，免鉴权）：
   - [中国疾控中心 · 全国急性呼吸道传染病哨点监测情况](https://www.chinacdc.cn/jksj/jksj04_14275/)（每周，HTML 表格）
@@ -9,7 +9,7 @@
   - [上海市卫健委 · 传染病疫情报告](https://wsjkw.sh.gov.cn/yqxx/index.html)（每月，含流感病例数，城市级）
   - [天津市疾控局 · 工作动态](https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/)（每月，流感病例数在月报附件的分病种统计表 DOCX 里，城市级）
 - 更新机制：GitHub Actions 每周五凌晨（北京时间）运行 `fetch.py`，周六上午补抓一次（应对迟发），抓取数据并提交 `data/` 到仓库（见 `.github/workflows/update.yml`，也可在 Actions 页面手动触发）
-- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；主图为「本季 vs 历年同期」包络图——灰带＝历年同期最高–最低、灰线＝中位，彩色线为本季 + 4 周预测；完整历史原始走势收在折叠区；另有预测回测诊断图、病原体阳性率「本周点 + 去年同期区间」图与周度热力图）；界面中英双语，语言选择记入 localStorage
+- 前端：原生 HTML/CSS/JS，无任何外部依赖和 CDN，图表为手写 SVG（折线图支持悬浮十字线读数；主图为「本季 vs 历年同期」包络图——灰带＝历年同期最高–最低、灰线＝中位，彩色线为本季 + 4 周预测；完整历史原始走势收在折叠区；另有预测回测诊断图、病原体阳性率「本周点 + 去年同期区间」图与「每个病原体一条迷你走势（近一年 vs 去年同期）」小倍数图；每张图的完整密集版本（原始周序列、周度热力图）分别收在折叠区）；界面中英双语，语言选择记入 localStorage
 
 ## 本地开发
 
@@ -132,7 +132,7 @@ A static site aggregating China's official weekly respiratory-disease surveillan
 - **ILI% short-term forecast** — 4-week point estimates with 80% intervals, plus past-season peak statistics
 - **This season vs previous seasons** — seasons aligned from week 27 (so the winter peak stays inside one season); a gray band shows the highest–lowest range across previous seasons at the same week, a gray line their median, and the colored line is this season plus its 4-week forecast (the full raw weekly history sits behind a collapsible section)
 - **Pathogen test positivity vs last year** — 11 respiratory pathogens from sentinel hospitals (outpatient ILI and inpatient SARI); each is drawn as a dot against the same weeks (±3) of last season (band) plus its median, so an unusual level is visible instead of having to be inferred from a ranking. Caveats stated on the card: the sentinel report publishes positivity only, so no confidence interval is computable, and with ~2 years of archive the reference set is thin (~7 weekly samples from one season)
-- **Weekly pathogen positivity heatmap** — the same data as a weekly heatmap (88+ weeks × 11 pathogens)
+- **Pathogen positivity trend (small multiples)** — one mini chart per pathogen: last 52 weeks against the same weeks a year earlier, each row with its own y-scale; the dense weekly heatmap (88+ weeks × 11 pathogens) is kept behind a collapsible section
 - **Key cities** — Chongqing (weekly), Shanghai and Tianjin (monthly notifiable-disease reports, including influenza case counts)
 - **Official analysis** — verbatim Chinese text from the source reports, marked as such in English mode
 

@@ -72,8 +72,10 @@ const I18N = {
     path_ref: "历年同期 {lo}–{hi}%（中位 {med}，{n} 个样本）",
     path_pct: "第 {p} 百分位",
     outp: "门急诊",
-    hm_h2: "病原体<span class=\"term\" data-term=\"positivity\">阳性率</span>周度热力图",
-    hm_note: "哨点周报各周核酸检测阳性率，颜色越红越高，灰色为无数据。悬浮可查看具体数值。",
+    hm_h2: "病原体<span class=\"term\" data-term=\"positivity\">阳性率</span>走势（近一年 vs 去年同期）",
+    hm_note: "每个病原体一条小图：彩色线＝近 52 周，灰色线＝去年同期（相差 52 周）；每行纵轴按各自峰值自适应，行首灰字为该行纵轴上限，右侧数字为本周值。悬浮可看每周两期对比。",
+    spark_cur: "近一年", spark_prev: "去年同期",
+    hm_raw_show: "查看完整热力图（每周一格，2024 年 11 月至今）",
     hm_out: "门急诊 ILI", hm_in: "住院 SARI",
     hm_tip: "阳性率 {v}%",
     no_data: "无数据",
@@ -172,8 +174,10 @@ const I18N = {
     path_ref: "Same weeks of past seasons {lo}–{hi}% (median {med}, n={n})",
     path_pct: "percentile {p}",
     outp: "Outp.",
-    hm_h2: "Weekly pathogen <span class=\"term\" data-term=\"positivity\">positivity</span> heatmap",
-    hm_note: "Weekly nucleic-acid positivity from sentinel reports; darker red = higher, gray = no data. Hover for values.",
+    hm_h2: "Pathogen <span class=\"term\" data-term=\"positivity\">positivity</span> trend (last year vs previous year)",
+    hm_note: "One mini chart per pathogen: colored line = last 52 weeks, gray line = the same weeks a year earlier. Each row has its own y-scale fitted to its peak (the small gray number at the left is that row's ceiling); the number on the right is this week's value. Hover for the week-by-week comparison.",
+    spark_cur: "last year", spark_prev: "year before",
+    hm_raw_show: "Show the full heatmap (one cell per week, Nov 2024 onwards)",
     hm_out: "Outpatient ILI", hm_in: "Inpatient SARI",
     hm_tip: "Positivity {v}%",
     no_data: "No data",
@@ -772,6 +776,111 @@ function renderSeasons(tr, scope, f) {
 }
 
 /* 病原体阳性率周度热力图 */
+/* 小倍数折线：每个病原体一条迷你走势图（彩色＝近 52 周，灰色＝去年同期），纵轴各自自适应 */
+const EPOCH_MS = Date.UTC(2015, 0, 5);
+const idxDate = (i) => new Date(EPOCH_MS + i * 604800000);
+function idxToYW(i) {
+  const d = idxDate(i);
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y = t.getUTCFullYear();
+  const week = Math.ceil(((t - Date.UTC(y, 0, 1)) / 86400000 + 1) / 7);
+  return [y, week];
+}
+
+function sparkChart(container, rows) {
+  const W = 880, labelW = 152, P = { r: 78, t: 20, b: 20 };
+  const rowH = 34;
+  const H = P.t + P.b + rows.length * rowH;
+  const plotW = W - labelW - P.r;
+  const xs = rows.flatMap(r => r.cur.concat(r.prev).map(p => p.i));
+  if (!xs.length) return;
+  const i0 = Math.min(...xs), i1 = Math.max(...xs);
+  const X = (i) => labelW + (i1 === i0 ? 0 : (i - i0) / (i1 - i0) * plotW);
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}` });
+
+  // 时间轴：按日期取 6 个刻度
+  for (let k = 0; k <= 5; k++) {
+    const i = Math.round(i0 + (i1 - i0) * k / 5);
+    const x = X(i);
+    svg.appendChild(svgEl("line", { x1: x, x2: x, y1: P.t, y2: H - P.b, stroke: "#f3f4f6" }));
+    const tk = svgEl("text", { x, y: H - 6, "text-anchor": "middle", class: "axis-label" });
+    tk.textContent = fmtDate(idxDate(i));
+    svg.appendChild(tk);
+  }
+
+  rows.forEach((r, i) => {
+    const y0 = P.t + i * rowH, yc = y0 + rowH / 2;
+    const Y = (v) => y0 + rowH - 7 - (v / r.ymax) * (rowH - 14);
+    const lab = svgEl("text", { x: labelW - 26, y: yc + 4, "text-anchor": "end", class: "bar-label" });
+    lab.textContent = r.label;
+    svg.appendChild(lab);
+    const cap = svgEl("text", { x: labelW - 6, y: y0 + 10, "text-anchor": "end", class: "axis-label" });
+    cap.textContent = `${r.ymax}%`;                      // 该行纵轴上限（自适应）
+    svg.appendChild(cap);
+    if (r.prev.length > 1)
+      svg.appendChild(svgEl("polyline", {
+        points: r.prev.map(p => `${X(p.i)},${Y(p.v)}`).join(" "),
+        fill: "none", stroke: "#cbd5e1", "stroke-width": 1.4 }));
+    if (r.cur.length > 1)
+      svg.appendChild(svgEl("polyline", {
+        points: r.cur.map(p => `${X(p.i)},${Y(p.v)}`).join(" "),
+        fill: "none", stroke: "var(--flu)", "stroke-width": 1.8 }));
+    const lastP = r.cur[r.cur.length - 1];
+    if (lastP) svg.appendChild(svgEl("circle", { cx: X(lastP.i), cy: Y(lastP.v), r: 2.8, fill: "var(--flu)" }));
+    const val = svgEl("text", { x: W - P.r + 8, y: yc + 4, class: "bar-value" });
+    val.textContent = r.value == null ? "—" : `${r.value}%`;
+    svg.appendChild(val);
+
+    const hit = svgEl("rect", { x: labelW, y: y0, width: plotW, height: rowH, fill: "transparent" });
+    hit.addEventListener("mousemove", (e) => {
+      const box = svg.getBoundingClientRect();
+      const mx = (e.clientX - box.left) / box.width * W;
+      const fi = i0 + (mx - labelW) / plotW * (i1 - i0);
+      let best = null, bd = Infinity;
+      for (const p of r.cur.concat(r.prev)) { const d = Math.abs(p.i - fi); if (d < bd) { bd = d; best = p.i; } }
+      if (best == null) return;
+      const [y, w] = idxToYW(best);
+      const d0 = idxDate(best);
+      let html = `<b>${r.label}</b><br>${fmtYW(y, w)}（${fmtDate(d0)}–${fmtDate(addDays(d0, 6))}）`;
+      const c = r.cur.find(p => p.i === best), pv = r.prev.find(p => p.i === best);
+      if (c) html += `<br><span style="color:var(--flu)">■</span> ${t("spark_cur")} ${c.v}%`;
+      if (pv) {
+        const dp = idxDate(pv.ri);
+        html += `<br><span style="color:#94a3b8">■</span> ${t("spark_prev")} ${pv.v}%` +
+                `　<span class="tip-dim">${fmtYW(...idxToYW(pv.ri))}</span>`;
+      }
+      showTip(e.pageX, e.pageY, html);
+    });
+    hit.addEventListener("mouseleave", hideTip);
+    svg.appendChild(hit);
+  });
+  container.appendChild(svg);
+}
+
+function renderSparklines(tr, scene) {
+  const ph = (tr && tr.pathogens) || {};
+  const names = Object.keys(ph).filter(n => ph[n].some(p => p[scene] != null));
+  if (!names.length) return;
+  const allIdx = new Set();
+  for (const n of names) for (const p of ph[n]) if (p[scene] != null) allIdx.add(wkIdx(p.year, p.week));
+  const idxs = [...allIdx].sort((a, b) => a - b);
+  const iMax = idxs[idxs.length - 1], iMin = iMax - (52 - 1);
+  const rows = names.map(n => {
+    const series = ph[n].filter(p => p[scene] != null).map(p => ({ i: wkIdx(p.year, p.week), v: p[scene] }));
+    // prev 平移到当前窗口（i+52）以便叠加对比；ri 保留真实周索引供悬浮提示
+    const cur = series.filter(s => s.i >= iMin && s.i <= iMax).map(s => ({ i: s.i, v: s.v, ri: s.i }));
+    const prev = series.filter(s => s.i >= iMin - 52 && s.i <= iMax - 52).map(s => ({ i: s.i + 52, v: s.v, ri: s.i }));
+    const peak = Math.max(1, ...cur.map(p => p.v), ...prev.map(p => p.v));
+    return { label: pName(n), cur, prev, value: cur.length ? cur[cur.length - 1].v : null,
+             ymax: Math.round(peak * 1.15 * 10) / 10 };
+  });
+  rows.sort((a, b) => (b.value ?? -1) - (a.value ?? -1));
+  $("pathogen-spark").innerHTML = "";
+  sparkChart($("pathogen-spark"), rows);
+}
+
 function renderHeatmap(tr, scene) {
   const ph = tr.pathogens || {};
   const names = Object.keys(ph).filter(n => ph[n].some(p => p[scene] !== null));
@@ -941,7 +1050,7 @@ function translateStatic() {
 }
 
 let LATEST = null, TRENDS = null, FORECAST = null;
-let seasonScope = "south", heatScene = "outpatient", backtestScope = "south", pathScene = "outpatient";
+let seasonScope = "south", backtestScope = "south", pathScene = "outpatient";
 
 function renderAll() {
   translateStatic();
@@ -954,7 +1063,8 @@ function renderAll() {
   if (TRENDS) {
     renderIli(TRENDS, FORECAST);
     renderSeasons(TRENDS, seasonScope, FORECAST);
-    renderHeatmap(TRENDS, heatScene);
+    renderHeatmap(TRENDS, pathScene);
+    renderSparklines(TRENDS, pathScene);
   }
   if (FORECAST) {
     renderForecast(FORECAST, TRENDS);
@@ -984,8 +1094,7 @@ async function main() {
     if (b) setLang(b.dataset.l);
   });
   for (const [id, fn] of [["season-scope", (k) => { seasonScope = k; renderSeasons(TRENDS, k, FORECAST); }],
-                          ["heatmap-scene", (k) => { heatScene = k; renderHeatmap(TRENDS, k); }],
-                          ["pathogen-scene", (k) => { pathScene = k; renderPathogens(LATEST, TRENDS, k); }],
+                          ["pathogen-scene", (k) => { pathScene = k; renderPathogens(LATEST, TRENDS, k); renderSparklines(TRENDS, k); renderHeatmap(TRENDS, k); }],
                           ["backtest-scope", (k) => { backtestScope = k; renderBacktest(FORECAST, TRENDS, k); }]]) {
     const el = $(id);
     if (!el) continue;

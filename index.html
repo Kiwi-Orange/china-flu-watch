@@ -68,12 +68,13 @@
   </section>
 
   <section class="card">
-    <h2 data-i18n-html="hm_h2">病原体阳性率周度热力图</h2>
-    <p class="note" data-i18n="hm_note">哨点周报各周核酸检测阳性率，颜色越红越高，灰色为无数据。悬浮可查看具体数值。</p>
-    <div class="seg" id="heatmap-scene">
-      <button data-k="outpatient" data-i18n="hm_out">门急诊 ILI</button><button data-k="inpatient" data-i18n="hm_in">住院 SARI</button>
-    </div>
-    <div id="pathogen-heatmap" class="chart"></div>
+    <h2 data-i18n-html="hm_h2">病原体阳性率走势（近一年 vs 去年同期）</h2>
+    <p class="note" data-i18n="hm_note">每个病原体一条小图：彩色线＝近 52 周，灰色线＝去年同期；每行纵轴按各自峰值自适应。</p>
+    <div id="pathogen-spark" class="chart"></div>
+    <details class="raw">
+      <summary data-i18n="hm_raw_show">查看完整热力图（每周一格，2024 年 11 月至今）</summary>
+      <div id="pathogen-heatmap" class="chart"></div>
+    </details>
   </section>
 
   <section class="card">
