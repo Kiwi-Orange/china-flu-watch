@@ -1,121 +1,121 @@
 {
- "updated": "2026-10-11 20:40:19 +08:00",
+ "updated": "2026-10-16 04:32:35 +08:00",
  "sentinel": {
-  "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261008_1842095.html",
+  "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261015_1842282.html",
   "year": 2026,
-  "week": 40,
-  "date_range": "2026年9月28日—10月4日",
-  "published": "2026-10-08",
-  "ili_pct_national": 3.9,
-  "ili_pct_south": 4.8,
-  "ili_pct_north": 3.1,
+  "week": 41,
+  "date_range": "2026年10月5日—10月11日",
+  "published": "2026-10-15",
+  "ili_pct_national": 3.8,
+  "ili_pct_south": 4.6,
+  "ili_pct_north": 3.0,
   "hospitals_multipathogen": 216,
   "outpatient_top3": [
    {
-    "name": "鼻病毒",
-    "pct": 14.2
-   },
-   {
     "name": "流感病毒",
-    "pct": 11.6
+    "pct": 13.6
    },
-   {
-    "name": "新型冠状病毒",
-    "pct": 4.9
-   }
-  ],
-  "inpatient_top3": [
    {
     "name": "鼻病毒",
     "pct": 11.2
    },
    {
-    "name": "人偏肺病毒",
-    "pct": 4.8
+    "name": "肠道病毒",
+    "pct": 3.9
+   }
+  ],
+  "inpatient_top3": [
+   {
+    "name": "鼻病毒",
+    "pct": 9.3
    },
    {
     "name": "流感病毒",
-    "pct": 4.2
+    "pct": 4.3
+   },
+   {
+    "name": "人偏肺病毒",
+    "pct": 4.1
    }
   ],
-  "analysis": "结合全国门急诊发热病例监测情况、哨点医院门急诊流感样病例就诊情况、多病原检测等监测结果分析显示，检出均为已知常见病原体，没有发现未知病原体及其导致的新发传染病。新型冠状病毒检测阳性率呈下降趋势，总体上已降至低流行水平。流感活动近几周呈下降趋势，主要为A(H3N2)亚型和B(Victoria)系流感病毒；南北方省份流感活动水平差异显著，南方省份检测阳性率处于中流行水平并呈波动下降，北方省份处于流行间期水平，15～59岁病例组检测阳性率最高。鼻病毒检测阳性率在高位波动，14岁以下病例组检测阳性率较高。人偏肺病毒和副流感病毒检测阳性率有所上升，均是0～4岁病例组检测阳性率较高。其他监测的呼吸道病原体阳性率处于低水平。 当前，全国大部分地区呼吸道传染病处于低水平，呈现小幅波动上升趋势。",
+  "analysis": "结合全国门急诊发热病例监测情况、哨点医院门急诊流感样病例就诊情况、多病原检测等监测结果分析显示，检出均为已知常见病原体，没有发现未知病原体及其导致的新发传染病。流感活动本周有所波动，主要为A(H3N2)亚型和B(Victoria)系流感病毒；南北方省份流感活动水平差异显著，南方省份检测阳性率处于中流行水平波动，北方省份处于低流行水平，15～59岁病例组检测阳性率高于其他年龄组。鼻病毒检测阳性率本周有所下降，14岁以下病例组检测阳性率较高。人偏肺病毒和副流感病毒在0～4岁病例组检测阳性率较高。新型冠状病毒检测阳性率持续下降。其他监测的呼吸道病原体阳性率处于低水平。 当前，全国大部分地区呼吸道传染病处于低水平，呈现小幅波动上升趋势。",
   "pathogens": [
    {
     "name": "新型冠状病毒",
-    "outpatient": 4.9,
-    "outpatient_wow": -1.9,
-    "inpatient": 2.3,
-    "inpatient_wow": -1.4
+    "outpatient": 3.4,
+    "outpatient_wow": -1.6,
+    "inpatient": 2.1,
+    "inpatient_wow": -0.5
    },
    {
     "name": "流感病毒",
-    "outpatient": 11.6,
-    "outpatient_wow": -3.6,
-    "inpatient": 4.2,
-    "inpatient_wow": -3.0
+    "outpatient": 13.6,
+    "outpatient_wow": 2.4,
+    "inpatient": 4.3,
+    "inpatient_wow": 0.5
    },
    {
     "name": "呼吸道合胞病毒",
-    "outpatient": 1.6,
-    "outpatient_wow": 0.0,
-    "inpatient": 1.8,
-    "inpatient_wow": -1.1
+    "outpatient": 1.3,
+    "outpatient_wow": -0.3,
+    "inpatient": 2.2,
+    "inpatient_wow": 0.1
    },
    {
     "name": "腺病毒",
-    "outpatient": 0.9,
-    "outpatient_wow": 0.2,
-    "inpatient": 0.7,
-    "inpatient_wow": 0.0
+    "outpatient": 1.0,
+    "outpatient_wow": 0.0,
+    "inpatient": 0.8,
+    "inpatient_wow": 0.1
    },
    {
     "name": "人偏肺病毒",
-    "outpatient": 4.7,
-    "outpatient_wow": 0.5,
-    "inpatient": 4.8,
-    "inpatient_wow": 0.1
+    "outpatient": 3.3,
+    "outpatient_wow": -1.4,
+    "inpatient": 4.1,
+    "inpatient_wow": -0.7
    },
    {
     "name": "副流感病毒",
-    "outpatient": 4.4,
-    "outpatient_wow": 1.5,
-    "inpatient": 2.1,
-    "inpatient_wow": 0.0
+    "outpatient": 3.9,
+    "outpatient_wow": -0.6,
+    "inpatient": 2.8,
+    "inpatient_wow": 0.5
    },
    {
     "name": "普通冠状病毒",
-    "outpatient": 0.5,
+    "outpatient": 0.6,
     "outpatient_wow": 0.0,
-    "inpatient": 0.4,
-    "inpatient_wow": 0.1
-   },
-   {
-    "name": "博卡病毒",
-    "outpatient": 1.7,
-    "outpatient_wow": 0.8,
-    "inpatient": 2.2,
-    "inpatient_wow": 0.4
-   },
-   {
-    "name": "鼻病毒",
-    "outpatient": 14.2,
-    "outpatient_wow": -0.1,
-    "inpatient": 11.2,
-    "inpatient_wow": 0.9
-   },
-   {
-    "name": "肠道病毒",
-    "outpatient": 4.1,
-    "outpatient_wow": 0.3,
-    "inpatient": 2.3,
+    "inpatient": 0.2,
     "inpatient_wow": -0.2
    },
    {
-    "name": "肺炎支原体",
-    "outpatient": 0.2,
+    "name": "博卡病毒",
+    "outpatient": 1.8,
     "outpatient_wow": 0.0,
-    "inpatient": 1.0,
-    "inpatient_wow": 0.0
+    "inpatient": 3.9,
+    "inpatient_wow": 1.6
+   },
+   {
+    "name": "鼻病毒",
+    "outpatient": 11.2,
+    "outpatient_wow": -3.6,
+    "inpatient": 9.3,
+    "inpatient_wow": -2.0
+   },
+   {
+    "name": "肠道病毒",
+    "outpatient": 3.9,
+    "outpatient_wow": -0.3,
+    "inpatient": 1.9,
+    "inpatient_wow": -0.6
+   },
+   {
+    "name": "肺炎支原体",
+    "outpatient": 0.3,
+    "outpatient_wow": 0.1,
+    "inpatient": 1.5,
+    "inpatient_wow": 0.5
    }
   ],
   "region_top3": {
@@ -134,13 +134,13 @@
    "north": {
     "outpatient": [
      "鼻病毒",
-     "新型冠状病毒",
-     "副流感病毒"
+     "副流感病毒",
+     "流感病毒"
     ],
     "inpatient": [
      "鼻病毒",
-     "人偏肺病毒",
-     "新型冠状病毒"
+     "博卡病毒",
+     "新型冠状病毒、人偏肺病毒、副流感病毒"
     ]
    }
   },
@@ -149,26 +149,26 @@
     "group": "0～4岁",
     "outpatient": [
      "鼻病毒",
-     "副流感病毒",
-     "人偏肺病毒"
+     "流感病毒",
+     "副流感病毒"
     ],
     "inpatient": [
      "鼻病毒",
-     "人偏肺病毒",
-     "博卡病毒"
+     "博卡病毒",
+     "人偏肺病毒"
     ]
    },
    {
     "group": "5～14岁",
     "outpatient": [
-     "鼻病毒",
      "流感病毒",
+     "鼻病毒",
      "肠道病毒"
     ],
     "inpatient": [
      "鼻病毒",
-     "人偏肺病毒",
-     "肺炎支原体"
+     "肺炎支原体",
+     "流感病毒"
     ]
    },
    {
@@ -179,8 +179,8 @@
      "新型冠状病毒"
     ],
     "inpatient": [
-     "流感病毒",
      "鼻病毒",
+     "流感病毒",
      "新型冠状病毒"
     ]
    },
@@ -202,114 +202,110 @@
   "stale": false
  },
  "cnic": {
-  "issue": 929,
-  "summary_as_of": "2026 年 10 月 4 日",
-  "summary": "· 监测数据显示，本周南方省份流感病毒检测阳性率略有上升、北方省份流感活动低，全国检出流感阳 性样本中甲型流感病毒占比 63.2%、乙型流感病毒占比 36.8%；甲型流感病毒中 A(H1N1)pdm09 占比 13.1%、 A(H3N2)占比 86.9%，乙型流感病毒均为 B（Victoria）系。全国共报告 10 起流感样病例暴发疫情。\n· 国家流感中心对 2026 年 3 月 30 日－2026 年 10 月 4 日（以实验日期统计）期间收检的部分流感病毒 毒 株 进 行 抗 原 性 分 析 ， 结 果 显 示 ： 在 A(H1N1)pdm09 亚 型 流 感 病 毒 毒 株 中 有 94.7% （ 72/76 ） 为 A/Missouri/11/2025 的类似株；在 A(H3N2)亚型流感病毒毒株中有 82.6%（355/430）为 A/Darwin/1454/2025 （鸡胚株）的类似株，90.0%（387/430）为 A/Darwin/1415/2025（细胞株）的类似株；在 B(Victoria)系流 感病毒毒株中有 93.9%（587/625）为 B/Tokyo/EIS13-175/2025 的类似株。\n· 国家流感中心对 2026 年 3 月 30 日以来收检的部分流感病毒毒株进行耐药性分析，结果显示：所有 A(H1N1)pdm09 流感病毒毒株均对神经氨酸酶抑制剂敏感；在 A(H3N2)亚型和 B(Victoria)系流感病毒毒株 中分别有 0.3%（1/382）和 0.3%（2/598）对神经氨酸酶抑制剂敏感性降低，其余 A(H3N2)亚型和 B(Victoria) 系流感病毒毒株均对神经氨酸酶抑制剂敏感。所有 A(H1N1)pdm09、A(H3N2)亚型和 B(Victoria)系流感病毒 毒株均对聚合酶抑制剂敏感。",
+  "issue": 930,
+  "summary_as_of": "2026 年 10 月 11 日",
+  "summary": "· 监测数据显示，本周南方省份流感病毒检测阳性率略有上升、北方省份流感活动低，全国检出流感阳 性样本中甲型流感病毒占比 67.9%、乙型流感病毒占比 32.1%；甲型流感病毒中 A(H1N1)pdm09 占比 16.5%、 A(H3N2)占比 83.5%，乙型流感病毒均为 B（Victoria）系。全国共报告 2 起流感样病例暴发疫情。\n· 国家流感中心对 2026 年 3 月 30 日－2026 年 10 月 11 日（以实验日期统计）期间收检的部分流感病 毒 毒 株 进 行 抗 原 性 分 析 ， 结 果 显 示 ： 在 A(H1N1)pdm09 亚 型 流 感 病 毒 毒 株 中 有 94.7% （ 72/76 ） 为 A/Missouri/11/2025 的类似株；在 A(H3N2)亚型流感病毒毒株中有 82.6%（355/430）为 A/Darwin/1454/2025 （鸡胚株）的类似株，90.0%（387/430）为 A/Darwin/1415/2025（细胞株）的类似株；在 B(Victoria)系流 感病毒毒株中有 93.7%（605/646）为 B/Tokyo/EIS13-175/2025 的类似株。\n· 国家流感中心对 2026 年 3 月 30 日以来收检的部分流感病毒毒株进行耐药性分析，结果显示：所有 A(H1N1)pdm09 流感病毒毒株均对神经氨酸酶抑制剂敏感；在 A(H3N2)亚型和 B(Victoria)系流感病毒毒株 中分别有 0.3%（1/382）和 0.3%（2/598）对神经氨酸酶抑制剂敏感性降低，其余 A(H3N2)亚型和 B(Victoria) 系流感病毒毒株均对神经氨酸酶抑制剂敏感。所有 A(H1N1)pdm09、A(H3N2)亚型和 B(Victoria)系流感病毒 毒株均对聚合酶抑制剂敏感。",
   "ili": {
    "south": {
-    "current": 4.8,
-    "prev_week": 5.2,
+    "current": 4.6,
+    "prev_week": 4.7,
     "same_week_prior_years": {
-     "2023": 5.2,
-     "2024": 4.0,
-     "2025": 4.2
+     "2023": 4.8,
+     "2024": 3.3,
+     "2025": 4.1
     }
    },
    "north": {
-    "current": 3.1,
-    "prev_week": 3.3,
+    "current": 3.0,
+    "prev_week": 3.1,
     "same_week_prior_years": {
-     "2023": 3.2,
-     "2024": 3.7,
-     "2025": 3.2
+     "2024": 3.2,
+     "2025": 2.9
     }
    }
   },
   "lab": {
    "south": {
-    "tested": 9919,
-    "positive": 1877,
-    "positive_pct": 18.9,
-    "a": 1172,
-    "a_pct": 62.4,
-    "h1n1pdm09": 134,
-    "h1n1pdm09_pct": 11.4,
-    "h3n2": 1038,
-    "h3n2_pct": 88.6,
+    "tested": 10604,
+    "positive": 2054,
+    "positive_pct": 19.4,
+    "a": 1377,
+    "a_pct": 67.0,
+    "h1n1pdm09": 185,
+    "h1n1pdm09_pct": 13.4,
+    "h3n2": 1192,
+    "h3n2_pct": 86.6,
     "a_unsubtyped": 0,
-    "b": 705,
-    "b_pct": 37.6,
+    "b": 677,
+    "b_pct": 33.0,
     "b_unlineaged": 0,
-    "victoria": 705,
+    "victoria": 677,
     "victoria_pct": 100.0,
     "yamagata": 0
    },
    "north": {
-    "tested": 7816,
-    "positive": 170,
-    "positive_pct": 2.2,
-    "a": 121,
-    "a_pct": 71.2,
-    "h1n1pdm09": 35,
-    "h1n1pdm09_pct": 28.9,
-    "h3n2": 86,
-    "h3n2_pct": 71.1,
+    "tested": 9248,
+    "positive": 289,
+    "positive_pct": 3.1,
+    "a": 213,
+    "a_pct": 73.7,
+    "h1n1pdm09": 77,
+    "h1n1pdm09_pct": 36.2,
+    "h3n2": 136,
+    "h3n2_pct": 63.8,
     "a_unsubtyped": 0,
-    "b": 49,
-    "b_pct": 28.8,
+    "b": 76,
+    "b_pct": 26.3,
     "b_unlineaged": 0,
-    "victoria": 49,
+    "victoria": 76,
     "victoria_pct": 100.0,
     "yamagata": 0
    },
    "total": {
-    "tested": 17735,
-    "positive": 2047,
-    "positive_pct": 11.5,
-    "a": 1293,
-    "a_pct": 63.2,
-    "h1n1pdm09": 169,
-    "h1n1pdm09_pct": 13.1,
-    "h3n2": 1124,
-    "h3n2_pct": 86.9,
+    "tested": 19852,
+    "positive": 2343,
+    "positive_pct": 11.8,
+    "a": 1590,
+    "a_pct": 67.9,
+    "h1n1pdm09": 262,
+    "h1n1pdm09_pct": 16.5,
+    "h3n2": 1328,
+    "h3n2_pct": 83.5,
     "a_unsubtyped": 0,
-    "b": 754,
-    "b_pct": 36.8,
+    "b": 753,
+    "b_pct": 32.1,
     "b_unlineaged": 0,
-    "victoria": 754,
+    "victoria": 753,
     "victoria_pct": 100.0,
     "yamagata": 0
    }
   },
   "outbreaks_week": {
-   "total": 10,
+   "total": 2,
    "by_type": {
-    "A(H3N2)": 1,
-    "A(H1N1)pdm09": 4,
-    "B(Victoria)": 3,
-    "混合型": 1,
-    "未检测": 1
+    "A(H1N1)pdm09": 1,
+    "混合型": 1
    }
   },
   "outbreaks_season": {
    "year": 2026,
    "start_week": 14,
-   "end_week": 40,
-   "total": 378,
+   "end_week": 41,
+   "total": 380,
    "by_type": {
-    "B(Victoria)": 254,
-    "A(H3N2)": 53,
-    "A(H1N1)pdm09": 12,
-    "A 型（亚型未显示）": 2,
+    "B(Victoria)": 255,
+    "A(H3N2)": 54,
+    "A(H1N1)pdm09": 14,
+    "A 型（亚型未显示）": 1,
     "B 型（分系未显示）": 5,
     "混合型": 18,
     "流感阴性": 24,
-    "未检测": 10
+    "未检测": 9
    },
-   "south": 286,
+   "south": 288,
    "north": 92,
    "by_region": {
-    "西南": 143,
+    "西南": 145,
     "华北": 18,
     "西北": 32,
     "华南": 48,
@@ -318,55 +314,51 @@
     "东北": 21
    }
   },
-  "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/t20261009_1842125.htm",
-  "pdf_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/P020261009509989783967.pdf",
+  "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/t20261015_1842284.htm",
+  "pdf_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/P020261015532264498007.pdf",
   "year": 2026,
-  "week": 40,
-  "published": "2026-10-08",
+  "week": 41,
+  "published": "2026-10-15",
   "warnings": [],
   "stale": false
  },
  "cities": {
   "chongqing": {
    "name": "重庆",
-   "source_url": "https://www.cqcdc.org/index.php?a=shows&catid=209&id=4200",
+   "source_url": "https://www.cqcdc.org/index.php?a=shows&catid=209&id=4222",
    "year": 2026,
-   "week": 38,
-   "published": "2026-09-28",
-   "date_range": "9月14日-9月20日",
+   "week": 40,
+   "published": "2026-10-13",
+   "date_range": "9月28日-10月4日",
    "outpatient_top": [
+    {
+     "name": "流感病毒",
+     "pct": 25.0
+    },
+    {
+     "name": "鼻病毒",
+     "pct": 17.0
+    },
+    {
+     "name": "副流感病毒",
+     "pct": 5.0
+    }
+   ],
+   "inpatient_top": [
     {
      "name": "流感病毒",
      "pct": 19.0
     },
     {
      "name": "鼻病毒",
-     "pct": 15.0
+     "pct": 16.0
     },
     {
      "name": "人偏肺病毒",
-     "pct": 4.0
-    },
-    {
-     "name": "副流感病毒",
-     "pct": 4.0
+     "pct": 3.0
     }
    ],
-   "inpatient_top": [
-    {
-     "name": "鼻病毒",
-     "pct": 11.0
-    },
-    {
-     "name": "流感病毒",
-     "pct": 9.0
-    },
-    {
-     "name": "肠道病毒",
-     "pct": 4.0
-    }
-   ],
-   "analysis": "结果分析显示，我市呼吸道传染病总体呈波动下降趋势，流感病毒、鼻病毒在一定水平活动。应注意防范呼吸道传染病，降低学校、养老机构等人群密集场所聚集性疫情发生风险。",
+   "analysis": "结果分析显示，我市呼吸道传染病总体呈波动变化趋势，流感病毒、鼻病毒在一定水平活动。应注意防范呼吸道传染病，降低学校、养老机构等人群密集场所聚集性疫情发生风险。",
    "stale": false
   },
   "shanghai": {
@@ -380,7 +372,7 @@
    "covid_cases": 74631,
    "total_cases": 136249,
    "total_deaths": 16,
-   "stale": false
+   "stale": true
   },
   "tianjin": {
    "name": "天津",
@@ -407,8 +399,8 @@
    "docx_url": "https://wsjk.tj.gov.cn/tjsjbyf/xwdt/gzdt/202609/W020260909551372685509.docx",
    "flu_cases": 1904,
    "flu_deaths": 0,
-   "stale": false
+   "stale": true
   },
-  "updated": "2026-10-11 20:41:25 +08:00"
+  "updated": "2026-10-16 04:35:05 +08:00"
  }
 }
