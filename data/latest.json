@@ -1,121 +1,121 @@
 {
- "updated": "2026-10-17 14:09:38 +08:00",
+ "updated": "2026-10-23 04:49:06 +08:00",
  "sentinel": {
-  "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261015_1842282.html",
+  "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261022_1842412.html",
   "year": 2026,
-  "week": 41,
-  "date_range": "2026年10月5日—10月11日",
-  "published": "2026-10-15",
-  "ili_pct_national": 3.8,
-  "ili_pct_south": 4.6,
-  "ili_pct_north": 3.0,
+  "week": 42,
+  "date_range": "2026年10月12日—10月18日",
+  "published": "2026-10-22",
+  "ili_pct_national": 3.7,
+  "ili_pct_south": 4.5,
+  "ili_pct_north": 2.8,
   "hospitals_multipathogen": 216,
   "outpatient_top3": [
    {
     "name": "流感病毒",
-    "pct": 13.6
+    "pct": 15.4
    },
    {
     "name": "鼻病毒",
-    "pct": 11.2
+    "pct": 10.9
    },
    {
-    "name": "肠道病毒",
-    "pct": 3.9
+    "name": "人偏肺病毒",
+    "pct": 3.7
    }
   ],
   "inpatient_top3": [
    {
     "name": "鼻病毒",
-    "pct": 9.3
+    "pct": 9.2
    },
    {
     "name": "流感病毒",
-    "pct": 4.3
+    "pct": 4.8
    },
    {
-    "name": "人偏肺病毒",
-    "pct": 4.1
+    "name": "博卡病毒",
+    "pct": 3.7
    }
   ],
-  "analysis": "结合全国门急诊发热病例监测情况、哨点医院门急诊流感样病例就诊情况、多病原检测等监测结果分析显示，检出均为已知常见病原体，没有发现未知病原体及其导致的新发传染病。流感活动本周有所波动，主要为A(H3N2)亚型和B(Victoria)系流感病毒；南北方省份流感活动水平差异显著，南方省份检测阳性率处于中流行水平波动，北方省份处于低流行水平，15～59岁病例组检测阳性率高于其他年龄组。鼻病毒检测阳性率本周有所下降，14岁以下病例组检测阳性率较高。人偏肺病毒和副流感病毒在0～4岁病例组检测阳性率较高。新型冠状病毒检测阳性率持续下降。其他监测的呼吸道病原体阳性率处于低水平。 当前，全国大部分地区呼吸道传染病处于低水平，呈现小幅波动上升趋势。",
+  "analysis": "结合全国门急诊发热病例监测情况、哨点医院门急诊流感样病例就诊情况、多病原检测等监测结果分析显示，检出均为已知常见病原体，没有发现未知病原体及其导致的新发传染病。流感活动有所上升，主要为A(H3N2)亚型和B(Victoria)系流感病毒；南北方省份流感活动水平差异显著，南方省份检测阳性率处于中流行水平，北方省份处于低流行水平，5～14岁病例组检测阳性率高于其他年龄组。鼻病毒检测阳性率本周继续下降，14岁以下病例组检测阳性率较高。人偏肺病毒、副流感病毒和博卡病毒在0～4岁病例组检测阳性率较高。其他监测的呼吸道病原体阳性率处于低水平。 当前，全国大部分地区呼吸道传染病处于低水平，呈现小幅波动上升趋势。",
   "pathogens": [
    {
     "name": "新型冠状病毒",
-    "outpatient": 3.4,
-    "outpatient_wow": -1.6,
-    "inpatient": 2.1,
+    "outpatient": 2.9,
+    "outpatient_wow": -0.5,
+    "inpatient": 1.6,
     "inpatient_wow": -0.5
    },
    {
     "name": "流感病毒",
-    "outpatient": 13.6,
-    "outpatient_wow": 2.4,
-    "inpatient": 4.3,
+    "outpatient": 15.4,
+    "outpatient_wow": 1.9,
+    "inpatient": 4.8,
     "inpatient_wow": 0.5
    },
    {
     "name": "呼吸道合胞病毒",
-    "outpatient": 1.3,
-    "outpatient_wow": -0.3,
-    "inpatient": 2.2,
-    "inpatient_wow": 0.1
+    "outpatient": 1.1,
+    "outpatient_wow": -0.2,
+    "inpatient": 1.9,
+    "inpatient_wow": -0.4
    },
    {
     "name": "腺病毒",
-    "outpatient": 1.0,
-    "outpatient_wow": 0.0,
-    "inpatient": 0.8,
+    "outpatient": 1.4,
+    "outpatient_wow": 0.4,
+    "inpatient": 0.9,
     "inpatient_wow": 0.1
    },
    {
     "name": "人偏肺病毒",
-    "outpatient": 3.3,
-    "outpatient_wow": -1.4,
-    "inpatient": 4.1,
-    "inpatient_wow": -0.7
+    "outpatient": 3.7,
+    "outpatient_wow": 0.4,
+    "inpatient": 3.5,
+    "inpatient_wow": -0.6
    },
    {
     "name": "副流感病毒",
-    "outpatient": 3.9,
-    "outpatient_wow": -0.6,
-    "inpatient": 2.8,
-    "inpatient_wow": 0.5
+    "outpatient": 3.6,
+    "outpatient_wow": -0.3,
+    "inpatient": 2.2,
+    "inpatient_wow": -0.7
    },
    {
     "name": "普通冠状病毒",
-    "outpatient": 0.6,
-    "outpatient_wow": 0.0,
-    "inpatient": 0.2,
-    "inpatient_wow": -0.2
+    "outpatient": 0.8,
+    "outpatient_wow": 0.2,
+    "inpatient": 0.6,
+    "inpatient_wow": 0.3
    },
    {
     "name": "博卡病毒",
-    "outpatient": 1.8,
-    "outpatient_wow": 0.0,
-    "inpatient": 3.9,
-    "inpatient_wow": 1.6
+    "outpatient": 1.9,
+    "outpatient_wow": 0.2,
+    "inpatient": 3.7,
+    "inpatient_wow": -0.1
    },
    {
     "name": "鼻病毒",
-    "outpatient": 11.2,
-    "outpatient_wow": -3.6,
-    "inpatient": 9.3,
-    "inpatient_wow": -2.0
+    "outpatient": 10.9,
+    "outpatient_wow": -0.4,
+    "inpatient": 9.2,
+    "inpatient_wow": 0.0
    },
    {
     "name": "肠道病毒",
-    "outpatient": 3.9,
-    "outpatient_wow": -0.3,
-    "inpatient": 1.9,
-    "inpatient_wow": -0.6
+    "outpatient": 3.2,
+    "outpatient_wow": -0.7,
+    "inpatient": 2.5,
+    "inpatient_wow": 0.6
    },
    {
     "name": "肺炎支原体",
     "outpatient": 0.3,
     "outpatient_wow": 0.1,
-    "inpatient": 1.5,
-    "inpatient_wow": 0.5
+    "inpatient": 1.4,
+    "inpatient_wow": -0.2
    }
   ],
   "region_top3": {
@@ -134,13 +134,13 @@
    "north": {
     "outpatient": [
      "鼻病毒",
-     "副流感病毒",
-     "流感病毒"
+     "流感病毒",
+     "副流感病毒"
     ],
     "inpatient": [
      "鼻病毒",
      "博卡病毒",
-     "新型冠状病毒、人偏肺病毒、副流感病毒"
+     "人偏肺病毒"
     ]
    }
   },
@@ -167,8 +167,8 @@
     ],
     "inpatient": [
      "鼻病毒",
-     "肺炎支原体",
-     "流感病毒"
+     "流感病毒",
+     "肺炎支原体"
     ]
    },
    {
@@ -181,7 +181,7 @@
     "inpatient": [
      "鼻病毒",
      "流感病毒",
-     "新型冠状病毒"
+     "新型冠状病毒、普通冠状病毒"
     ]
    },
    {
@@ -401,6 +401,6 @@
    "flu_deaths": 0,
    "stale": true
   },
-  "updated": "2026-10-17 14:12:14 +08:00"
+  "updated": "2026-10-23 04:51:41 +08:00"
  }
 }
