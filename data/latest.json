@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23 04:49:06 +08:00",
+ "updated": "2026-10-24 14:26:59 +08:00",
  "sentinel": {
   "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261022_1842412.html",
   "year": 2026,
@@ -202,123 +202,126 @@
   "stale": false
  },
  "cnic": {
-  "issue": 930,
-  "summary_as_of": "2026 年 10 月 11 日",
-  "summary": "· 监测数据显示，本周南方省份流感病毒检测阳性率略有上升、北方省份流感活动低，全国检出流感阳 性样本中甲型流感病毒占比 67.9%、乙型流感病毒占比 32.1%；甲型流感病毒中 A(H1N1)pdm09 占比 16.5%、 A(H3N2)占比 83.5%，乙型流感病毒均为 B（Victoria）系。全国共报告 2 起流感样病例暴发疫情。\n· 国家流感中心对 2026 年 3 月 30 日－2026 年 10 月 11 日（以实验日期统计）期间收检的部分流感病 毒 毒 株 进 行 抗 原 性 分 析 ， 结 果 显 示 ： 在 A(H1N1)pdm09 亚 型 流 感 病 毒 毒 株 中 有 94.7% （ 72/76 ） 为 A/Missouri/11/2025 的类似株；在 A(H3N2)亚型流感病毒毒株中有 82.6%（355/430）为 A/Darwin/1454/2025 （鸡胚株）的类似株，90.0%（387/430）为 A/Darwin/1415/2025（细胞株）的类似株；在 B(Victoria)系流 感病毒毒株中有 93.7%（605/646）为 B/Tokyo/EIS13-175/2025 的类似株。\n· 国家流感中心对 2026 年 3 月 30 日以来收检的部分流感病毒毒株进行耐药性分析，结果显示：所有 A(H1N1)pdm09 流感病毒毒株均对神经氨酸酶抑制剂敏感；在 A(H3N2)亚型和 B(Victoria)系流感病毒毒株 中分别有 0.3%（1/382）和 0.3%（2/598）对神经氨酸酶抑制剂敏感性降低，其余 A(H3N2)亚型和 B(Victoria) 系流感病毒毒株均对神经氨酸酶抑制剂敏感。所有 A(H1N1)pdm09、A(H3N2)亚型和 B(Victoria)系流感病毒 毒株均对聚合酶抑制剂敏感。",
+  "issue": 931,
+  "summary_as_of": "2026 年 10 月 18 日",
+  "summary": "· 监测数据显示，本周南、北方省份流感病毒检测阳性率略有上升，全国检出流感阳性样本中甲型流感 病毒占比 66.1%、乙型流感病毒占比 33.9%；甲型流感病毒中 A(H1N1)pdm09 占比 19.4%、A(H3N2)占比 80.6%，乙型流感病毒均为 B（Victoria）系。全国共报告 28 起流感样病例暴发疫情。\n· 国家流感中心对 2026 年 3 月 30 日－2026 年 10 月 18 日（以实验日期统计）期间收检的部分流感病 毒 毒 株 进 行 抗 原 性 分 析 ， 结 果 显 示 ： 在 A(H1N1)pdm09 亚 型 流 感 病 毒 毒 株 中 有 94.7% （ 72/76 ） 为 A/Missouri/11/2025 的类似株；在 A(H3N2)亚型流感病毒毒株中有 82.6%（355/430）为 A/Darwin/1454/2025 （鸡胚株）的类似株，90.0%（387/430）为 A/Darwin/1415/2025（细胞株）的类似株；在 B(Victoria)系流 感病毒毒株中有 93.7%（605/646）为 B/Tokyo/EIS13-175/2025 的类似株。\n· 国家流感中心对 2026 年 3 月 30 日以来收检的部分流感病毒毒株进行耐药性分析，结果显示：所有 A(H1N1)pdm09 流感病毒毒株均对神经氨酸酶抑制剂敏感；在 A(H3N2)亚型和 B(Victoria)系流感病毒毒株 中分别有 0.3%（1/382）和 0.3%（2/598）对神经氨酸酶抑制剂敏感性降低，其余 A(H3N2)亚型和 B(Victoria) 系流感病毒毒株均对神经氨酸酶抑制剂敏感。所有 A(H1N1)pdm09、A(H3N2)亚型和 B(Victoria)系流感病毒 毒株均对聚合酶抑制剂敏感。",
   "ili": {
    "south": {
-    "current": 4.6,
-    "prev_week": 4.7,
+    "current": 4.5,
+    "prev_week": 4.6,
     "same_week_prior_years": {
-     "2023": 4.8,
+     "2023": 5.3,
      "2024": 3.3,
-     "2025": 4.1
+     "2025": 3.8
     }
    },
    "north": {
-    "current": 3.0,
-    "prev_week": 3.1,
+    "current": 2.8,
+    "prev_week": 3.0,
     "same_week_prior_years": {
-     "2024": 3.2,
-     "2025": 2.9
+     "2024": 3.6,
+     "2025": 2.8
     }
    }
   },
   "lab": {
    "south": {
-    "tested": 10604,
-    "positive": 2054,
-    "positive_pct": 19.4,
-    "a": 1377,
-    "a_pct": 67.0,
-    "h1n1pdm09": 185,
-    "h1n1pdm09_pct": 13.4,
-    "h3n2": 1192,
-    "h3n2_pct": 86.6,
+    "tested": 10685,
+    "positive": 2085,
+    "positive_pct": 19.5,
+    "a": 1358,
+    "a_pct": 65.1,
+    "h1n1pdm09": 205,
+    "h1n1pdm09_pct": 15.1,
+    "h3n2": 1153,
+    "h3n2_pct": 84.9,
     "a_unsubtyped": 0,
-    "b": 677,
-    "b_pct": 33.0,
+    "b": 727,
+    "b_pct": 34.9,
     "b_unlineaged": 0,
-    "victoria": 677,
+    "victoria": 727,
     "victoria_pct": 100.0,
     "yamagata": 0
    },
    "north": {
-    "tested": 9248,
-    "positive": 289,
-    "positive_pct": 3.1,
-    "a": 213,
-    "a_pct": 73.7,
-    "h1n1pdm09": 77,
-    "h1n1pdm09_pct": 36.2,
-    "h3n2": 136,
-    "h3n2_pct": 63.8,
+    "tested": 9602,
+    "positive": 369,
+    "positive_pct": 3.8,
+    "a": 264,
+    "a_pct": 71.5,
+    "h1n1pdm09": 110,
+    "h1n1pdm09_pct": 41.7,
+    "h3n2": 154,
+    "h3n2_pct": 58.3,
     "a_unsubtyped": 0,
-    "b": 76,
-    "b_pct": 26.3,
+    "b": 105,
+    "b_pct": 28.5,
     "b_unlineaged": 0,
-    "victoria": 76,
+    "victoria": 105,
     "victoria_pct": 100.0,
     "yamagata": 0
    },
    "total": {
-    "tested": 19852,
-    "positive": 2343,
-    "positive_pct": 11.8,
-    "a": 1590,
-    "a_pct": 67.9,
-    "h1n1pdm09": 262,
-    "h1n1pdm09_pct": 16.5,
-    "h3n2": 1328,
-    "h3n2_pct": 83.5,
+    "tested": 20287,
+    "positive": 2454,
+    "positive_pct": 12.1,
+    "a": 1622,
+    "a_pct": 66.1,
+    "h1n1pdm09": 315,
+    "h1n1pdm09_pct": 19.4,
+    "h3n2": 1307,
+    "h3n2_pct": 80.6,
     "a_unsubtyped": 0,
-    "b": 753,
-    "b_pct": 32.1,
+    "b": 832,
+    "b_pct": 33.9,
     "b_unlineaged": 0,
-    "victoria": 753,
+    "victoria": 832,
     "victoria_pct": 100.0,
     "yamagata": 0
    }
   },
   "outbreaks_week": {
-   "total": 2,
+   "total": 28,
    "by_type": {
-    "A(H1N1)pdm09": 1,
-    "混合型": 1
+    "A(H3N2)": 7,
+    "A(H1N1)pdm09": 8,
+    "B(Victoria)": 1,
+    "混合型": 6,
+    "未检测": 6
    }
   },
   "outbreaks_season": {
    "year": 2026,
    "start_week": 14,
-   "end_week": 41,
-   "total": 380,
+   "end_week": 42,
+   "total": 408,
    "by_type": {
-    "B(Victoria)": 255,
-    "A(H3N2)": 54,
-    "A(H1N1)pdm09": 14,
+    "B(Victoria)": 256,
+    "A(H3N2)": 61,
+    "A(H1N1)pdm09": 21,
     "A 型（亚型未显示）": 1,
     "B 型（分系未显示）": 5,
-    "混合型": 18,
-    "流感阴性": 24,
-    "未检测": 9
+    "混合型": 24,
+    "流感阴性": 25,
+    "未检测": 15
    },
-   "south": 288,
-   "north": 92,
+   "south": 311,
+   "north": 97,
    "by_region": {
-    "西南": 145,
+    "西南": 168,
     "华北": 18,
-    "西北": 32,
+    "西北": 33,
     "华南": 48,
-    "华东": 103,
+    "华东": 107,
     "华中": 13,
     "东北": 21
    }
   },
-  "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/t20261015_1842284.htm",
-  "pdf_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/P020261015532264498007.pdf",
+  "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/t20261023_1842431.htm",
+  "pdf_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/P020261023490366214700.pdf",
   "year": 2026,
-  "week": 41,
-  "published": "2026-10-15",
+  "week": 42,
+  "published": "2026-10-22",
   "warnings": [],
   "stale": false
  },
@@ -401,6 +404,6 @@
    "flu_deaths": 0,
    "stale": true
   },
-  "updated": "2026-10-23 04:51:41 +08:00"
+  "updated": "2026-10-24 14:29:34 +08:00"
  }
 }
