@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-30 06:00:33 +08:00",
+ "updated": "2026-10-31 15:29:40 +08:00",
  "sentinel": {
   "source_url": "https://www.chinacdc.cn/jksj/jksj04_14275/202610/t20261029_1842566.html",
   "year": 2026,
@@ -202,126 +202,128 @@
   "stale": false
  },
  "cnic": {
-  "issue": 931,
-  "summary_as_of": "2026 年 10 月 18 日",
-  "summary": "· 监测数据显示，本周南、北方省份流感病毒检测阳性率略有上升，全国检出流感阳性样本中甲型流感 病毒占比 66.1%、乙型流感病毒占比 33.9%；甲型流感病毒中 A(H1N1)pdm09 占比 19.4%、A(H3N2)占比 80.6%，乙型流感病毒均为 B（Victoria）系。全国共报告 28 起流感样病例暴发疫情。\n· 国家流感中心对 2026 年 3 月 30 日－2026 年 10 月 18 日（以实验日期统计）期间收检的部分流感病 毒 毒 株 进 行 抗 原 性 分 析 ， 结 果 显 示 ： 在 A(H1N1)pdm09 亚 型 流 感 病 毒 毒 株 中 有 94.7% （ 72/76 ） 为 A/Missouri/11/2025 的类似株；在 A(H3N2)亚型流感病毒毒株中有 82.6%（355/430）为 A/Darwin/1454/2025 （鸡胚株）的类似株，90.0%（387/430）为 A/Darwin/1415/2025（细胞株）的类似株；在 B(Victoria)系流 感病毒毒株中有 93.7%（605/646）为 B/Tokyo/EIS13-175/2025 的类似株。\n· 国家流感中心对 2026 年 3 月 30 日以来收检的部分流感病毒毒株进行耐药性分析，结果显示：所有 A(H1N1)pdm09 流感病毒毒株均对神经氨酸酶抑制剂敏感；在 A(H3N2)亚型和 B(Victoria)系流感病毒毒株 中分别有 0.3%（1/382）和 0.3%（2/598）对神经氨酸酶抑制剂敏感性降低，其余 A(H3N2)亚型和 B(Victoria) 系流感病毒毒株均对神经氨酸酶抑制剂敏感。所有 A(H1N1)pdm09、A(H3N2)亚型和 B(Victoria)系流感病毒 毒株均对聚合酶抑制剂敏感。",
+  "issue": 932,
+  "summary_as_of": "2026 年 10 月 25 日",
+  "summary": "· 监测数据显示，本周南方省份流感病毒检测阳性率略有下降、北方省份流感病毒检测阳性率略有上升， 全 国 检 出 流 感 阳 性 样 本 中 甲 型 流 感 病 毒 占 比 67.6% 、 乙 型 流 感 病 毒 占 比 32.4% ； 甲 型 流 感 病 毒 中 A(H1N1)pdm09 占比 32.8%、A(H3N2)占比 67.2%，乙型流感病毒均为 B（Victoria）系。全国共报告 145 起流感样病例暴发疫情。\n· 国家流感中心对 2026 年 3 月 30 日－2026 年 10 月 25 日（以实验日期统计）期间收检的部分流感病 毒 毒 株 进 行 抗 原 性 分 析 ， 结 果 显 示 ： 在 A(H1N1)pdm09 亚 型 流 感 病 毒 毒 株 中 有 94.7% （ 72/76 ） 为 A/Missouri/11/2025 的类似株；在 A(H3N2)亚型流感病毒毒株中有 82.6%（355/430）为 A/Darwin/1454/2025 （鸡胚株）的类似株，90.0%（387/430）为 A/Darwin/1415/2025（细胞株）的类似株；在 B(Victoria)系流 感病毒毒株中有 93.7%（658/702）为 B/Tokyo/EIS13-175/2025 的类似株。\n· 国家流感中心对 2026 年 3 月 30 日以来收检的部分流感病毒毒株进行耐药性分析，结果显示：所有 A(H1N1)pdm09 流感病毒毒株均对神经氨酸酶抑制剂敏感；在 A(H3N2)亚型和 B(Victoria)系流感病毒毒株 中分别有 0.2%（1/444）和 0.3%（2/659）对神经氨酸酶抑制剂敏感性降低，其余 A(H3N2)亚型和 B(Victoria) 系流感病毒毒株均对神经氨酸酶抑制剂敏感。所有 A(H1N1)pdm09、A(H3N2)亚型和 B(Victoria)系流感病毒 毒株均对聚合酶抑制剂敏感。",
   "ili": {
    "south": {
     "current": 4.5,
-    "prev_week": 4.6,
+    "prev_week": 4.5,
     "same_week_prior_years": {
-     "2023": 5.3,
-     "2024": 3.3,
-     "2025": 3.8
+     "2023": 5.6
     }
    },
    "north": {
-    "current": 2.8,
-    "prev_week": 3.0,
+    "current": 3.0,
+    "prev_week": 2.8,
     "same_week_prior_years": {
-     "2024": 3.6,
-     "2025": 2.8
+     "2023": 4.2,
+     "2024": 3.2,
+     "2025": 3.7
     }
    }
   },
   "lab": {
    "south": {
-    "tested": 10685,
-    "positive": 2085,
-    "positive_pct": 19.5,
-    "a": 1358,
-    "a_pct": 65.1,
-    "h1n1pdm09": 205,
-    "h1n1pdm09_pct": 15.1,
-    "h3n2": 1153,
-    "h3n2_pct": 84.9,
+    "tested": 10720,
+    "positive": 1933,
+    "positive_pct": 18.0,
+    "a": 1243,
+    "a_pct": 64.3,
+    "h1n1pdm09": 271,
+    "h1n1pdm09_pct": 21.8,
+    "h3n2": 972,
+    "h3n2_pct": 78.2,
     "a_unsubtyped": 0,
-    "b": 727,
-    "b_pct": 34.9,
+    "b": 690,
+    "b_pct": 35.7,
     "b_unlineaged": 0,
-    "victoria": 727,
+    "victoria": 690,
     "victoria_pct": 100.0,
     "yamagata": 0
    },
    "north": {
-    "tested": 9602,
-    "positive": 369,
-    "positive_pct": 3.8,
-    "a": 264,
-    "a_pct": 71.5,
-    "h1n1pdm09": 110,
-    "h1n1pdm09_pct": 41.7,
-    "h3n2": 154,
-    "h3n2_pct": 58.3,
+    "tested": 9709,
+    "positive": 480,
+    "positive_pct": 4.9,
+    "a": 387,
+    "a_pct": 80.6,
+    "h1n1pdm09": 263,
+    "h1n1pdm09_pct": 68.0,
+    "h3n2": 124,
+    "h3n2_pct": 32.0,
     "a_unsubtyped": 0,
-    "b": 105,
-    "b_pct": 28.5,
+    "b": 93,
+    "b_pct": 19.4,
     "b_unlineaged": 0,
-    "victoria": 105,
+    "victoria": 93,
     "victoria_pct": 100.0,
     "yamagata": 0
    },
    "total": {
-    "tested": 20287,
-    "positive": 2454,
-    "positive_pct": 12.1,
-    "a": 1622,
-    "a_pct": 66.1,
-    "h1n1pdm09": 315,
-    "h1n1pdm09_pct": 19.4,
-    "h3n2": 1307,
-    "h3n2_pct": 80.6,
+    "tested": 20429,
+    "positive": 2413,
+    "positive_pct": 11.8,
+    "a": 1630,
+    "a_pct": 67.6,
+    "h1n1pdm09": 534,
+    "h1n1pdm09_pct": 32.8,
+    "h3n2": 1096,
+    "h3n2_pct": 67.2,
     "a_unsubtyped": 0,
-    "b": 832,
-    "b_pct": 33.9,
+    "b": 783,
+    "b_pct": 32.4,
     "b_unlineaged": 0,
-    "victoria": 832,
+    "victoria": 783,
     "victoria_pct": 100.0,
     "yamagata": 0
    }
   },
   "outbreaks_week": {
-   "total": 28,
+   "total": 145,
    "by_type": {
-    "A(H3N2)": 7,
-    "A(H1N1)pdm09": 8,
-    "B(Victoria)": 1,
-    "混合型": 6,
-    "未检测": 6
+    "A(H3N2)": 14,
+    "A(H1N1)pdm09": 28,
+    "A 型（亚型未显示）": 20,
+    "B(Victoria)": 22,
+    "B 型（系未显示）": 1,
+    "混合型": 22,
+    "流感阴性": 3,
+    "未检测": 35
    }
   },
   "outbreaks_season": {
    "year": 2026,
    "start_week": 14,
-   "end_week": 42,
-   "total": 408,
+   "end_week": 43,
+   "total": 553,
    "by_type": {
-    "B(Victoria)": 256,
-    "A(H3N2)": 61,
-    "A(H1N1)pdm09": 21,
-    "A 型（亚型未显示）": 1,
+    "B(Victoria)": 281,
+    "A(H3N2)": 77,
+    "A(H1N1)pdm09": 50,
+    "A 型（亚型未显示）": 21,
     "B 型（分系未显示）": 5,
-    "混合型": 24,
-    "流感阴性": 25,
-    "未检测": 15
+    "混合型": 47,
+    "流感阴性": 27,
+    "未检测": 45
    },
-   "south": 311,
-   "north": 97,
+   "south": 406,
+   "north": 147,
    "by_region": {
-    "西南": 168,
-    "华北": 18,
-    "西北": 33,
-    "华南": 48,
-    "华东": 107,
+    "西南": 289,
+    "华北": 21,
+    "西北": 40,
+    "华南": 52,
+    "华东": 115,
     "华中": 13,
-    "东北": 21
+    "东北": 23
    }
   },
-  "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/t20261023_1842431.htm",
-  "pdf_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/P020261023490366214700.pdf",
+  "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/t20261030_1842571.htm",
+  "pdf_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202610/P020261030370769164980.pdf",
   "year": 2026,
-  "week": 42,
-  "published": "2026-10-22",
+  "week": 43,
+  "published": "2026-10-29",
   "warnings": [],
   "stale": false
  },
@@ -404,6 +406,6 @@
    "flu_deaths": 0,
    "stale": true
   },
-  "updated": "2026-10-30 06:03:15 +08:00"
+  "updated": "2026-10-31 15:32:32 +08:00"
  }
 }
