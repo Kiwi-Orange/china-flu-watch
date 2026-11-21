@@ -648,3 +648,8 @@ year,week,scope,pct,source
 2026,43,national,3.7,current
 2026,43,north,3.0,current
 2026,43,south,4.5,current
+2026,45,north,3.8,prev_week
+2026,45,south,4.6,prev_week
+2026,46,national,4.5,current
+2026,46,north,4.5,current
+2026,46,south,4.6,current
